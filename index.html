@@ -6,7 +6,6 @@
     <title>مؤسسة آفاق التبريد التجارية - World Cooling Trade</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f14; color: #e6edf3; padding: 16px; transition: 0.3s; }
@@ -56,10 +55,11 @@
         .report-summary .stat .label { font-size: 14px; color: #8b949e; }
         .filter-row { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #30363d; }
         .filter-row .flex-row { margin: 0; }
-        .file-input-hidden { display: none; }
-        .receipt-link { color: #58a6ff; text-decoration: none; }
-        .receipt-link:hover { text-decoration: underline; }
-        .receipt-upload { display: inline-flex; align-items: center; gap: 6px; }
+        .balance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .balance-item { background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
+        .balance-item label { display: block; font-weight: bold; color: #8b949e; margin-bottom: 5px; }
+        .balance-item input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; text-align: center; font-size: 20px; }
+        .balance-item .bank-name { font-size: 16px; color: #58a6ff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -102,10 +102,27 @@
             <div class="card">
                 <h2 id="titleBalances">🏦 الأرصدة البنكية</h2>
                 <div style="color:#8b949e;font-size:14px;margin-bottom:12px;" id="balanceNote">✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).</div>
-                <div class="flex-row">
-                    <label id="lblAhli">🇸🇦 الأهلي: <input type="number" id="balAhli" step="0.01" /></label>
-                    <label id="lblFaransi">🇫🇷 الفرنسي: <input type="number" id="balFaransi" step="0.01" /></label>
-                    <label id="lblInma">🇸🇦 الإنماء: <input type="number" id="balInma" step="0.01" /></label>
+                <div class="balance-grid" id="balanceGrid">
+                    <!-- الأهلي الهفوف -->
+                    <div class="balance-item">
+                        <label id="lblAhliHufuf">🇸🇦 الأهلي (الهفوف)</label>
+                        <input type="number" id="balAhliHufuf" step="0.01" />
+                    </div>
+                    <!-- الأهلي المبرز -->
+                    <div class="balance-item">
+                        <label id="lblAhliMubarraz">🇸🇦 الأهلي (المبرز)</label>
+                        <input type="number" id="balAhliMubarraz" step="0.01" />
+                    </div>
+                    <!-- الفرنسي -->
+                    <div class="balance-item">
+                        <label id="lblFaransi">🇫🇷 الفرنسي</label>
+                        <input type="number" id="balFaransi" step="0.01" />
+                    </div>
+                    <!-- الإنماء -->
+                    <div class="balance-item">
+                        <label id="lblInma">🇸🇦 الإنماء</label>
+                        <input type="number" id="balInma" step="0.01" />
+                    </div>
                 </div>
                 <div class="total-box" id="totalBalance">المجموع: 0.00 ريال</div>
             </div>
@@ -125,7 +142,7 @@
                 </div>
                 <div style="font-size:13px;color:#8b949e;margin-bottom:8px;" id="invoiceHint">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
                 <table>
-                    <thead><tr><th>#</th><th id="thCompany">الشركة</th><th id="thAmount">المبلغ</th><th id="thDate">تاريخ الإضافة</th><th id="thStatus">الحالة</th><th id="thPayBank">بنك الدفع</th><th id="thReceipt">الإيصال</th><th id="thAction2">إجراء</th></tr></thead>
+                    <thead><tr><th>#</th><th id="thCompany">الشركة</th><th id="thAmount">المبلغ</th><th id="thDate">تاريخ الإضافة</th><th id="thStatus">الحالة</th><th id="thPayBank">بنك الدفع</th><th id="thAction2">إجراء</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
                 </table>
                 <div class="total-box" id="totalInvoices">إجمالي المدفوعات: 0.00 ريال</div>
@@ -157,7 +174,7 @@
                 </div>
 
                 <table>
-                    <thead><tr><th>#</th><th id="repCompany">الشركة</th><th id="repAmount">المبلغ</th><th id="repDateAdded">تاريخ الإضافة</th><th id="repDatePaid">تاريخ الدفع</th><th id="repStatus">الحالة</th><th id="repBank">بنك الدفع</th><th id="repReceipt">الإيصال</th></tr></thead>
+                    <thead><tr><th>#</th><th id="repCompany">الشركة</th><th id="repAmount">المبلغ</th><th id="repDateAdded">تاريخ الإضافة</th><th id="repDatePaid">تاريخ الدفع</th><th id="repStatus">الحالة</th><th id="repBank">بنك الدفع</th></tr></thead>
                     <tbody id="reportBody"></tbody>
                 </table>
                 <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -182,20 +199,37 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // ============================================================
         //  البيانات
         // ============================================================
         let data = {
             suppliers: [],
-            balances: { ahli: 0, faransi: 0, inma: 0 },
-            invoices: []  // { id, company, amount, date, paid, payBank, payDate, receiptUrl }
+            balances: { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 },
+            invoices: []  // { id, company, amount, date, paid, payBank, payDate }
         };
 
         let isSaving = false;
         let lastSavedData = '';
         let currentLang = 'ar';
+
+        // ============================================================
+        //  قائمة البنوك (للعرض في الدفع)
+        // ============================================================
+        const BANK_OPTIONS = {
+            ar: [
+                { value: 'الأهلي (الهفوف)', label: 'الأهلي (الهفوف)' },
+                { value: 'الأهلي (المبرز)', label: 'الأهلي (المبرز)' },
+                { value: 'الفرنسي', label: 'الفرنسي' },
+                { value: 'الإنماء', label: 'الإنماء' }
+            ],
+            en: [
+                { value: 'AlAhli (Hufuf)', label: 'AlAhli (Hufuf)' },
+                { value: 'AlAhli (Mubarraz)', label: 'AlAhli (Mubarraz)' },
+                { value: 'French Bank', label: 'French Bank' },
+                { value: 'AlInma', label: 'AlInma' }
+            ]
+        };
 
         // ============================================================
         //  دوال التاريخ
@@ -244,11 +278,7 @@
                 thDate: 'تاريخ الإضافة',
                 thStatus: 'الحالة',
                 thPayBank: 'بنك الدفع',
-                thReceipt: 'الإيصال',
                 thAction2: 'إجراء',
-                lblAhli: '🇸🇦 الأهلي:',
-                lblFaransi: '🇫🇷 الفرنسي:',
-                lblInma: '🇸🇦 الإنماء:',
                 totalBalance: 'المجموع:',
                 totalInvoices: 'إجمالي المدفوعات:',
                 emptySuppliers: 'لا يوجد موردون',
@@ -259,8 +289,6 @@
                 delete: '🗑️ حذف',
                 save: '💾 حفظ',
                 pay: '💰 دفع',
-                uploadReceipt: '📎 رفع إيصال',
-                viewReceipt: '👁️ عرض',
                 alertFillFields: 'الرجاء ملء الحقول المطلوبة',
                 alertValidAmount: 'أدخل مبلغاً صحيحاً',
                 confirmDelete: 'هل أنت متأكد من الحذف؟',
@@ -272,7 +300,6 @@
                 placeholderCompanyNew: 'أو اكتب اسم جديد',
                 placeholderAmount: 'المبلغ',
                 selectDefault: '-- اختر مورد من القائمة --',
-                selectBank: '-- اختر بنك الدفع --',
                 paid: 'مدفوعة ✅',
                 unpaid: 'غير مدفوعة ❌',
                 statCount: 'عدد الفواتير',
@@ -288,7 +315,6 @@
                 repDatePaid: 'تاريخ الدفع',
                 repStatus: 'الحالة',
                 repBank: 'بنك الدفع',
-                repReceipt: 'الإيصال',
                 allSuppliers: '-- جميع الموردين --',
                 invoiceHint: '* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.',
                 balanceNote: '✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).',
@@ -300,9 +326,10 @@
                 syncSaved: '✅ تم الحفظ في السحابة',
                 syncSaveFailed: '❌ فشل الحفظ',
                 syncUpdated: '🔄 تم التحديث من جهاز آخر',
-                receiptUploaded: '✅ تم رفع الإيصال بنجاح',
-                receiptFailed: '❌ فشل رفع الإيصال',
-                noReceipt: 'لا يوجد إيصال'
+                lblAhliHufuf: '🇸🇦 الأهلي (الهفوف)',
+                lblAhliMubarraz: '🇸🇦 الأهلي (المبرز)',
+                lblFaransi: '🇫🇷 الفرنسي',
+                lblInma: '🇸🇦 الإنماء'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -321,11 +348,7 @@
                 thDate: 'Added Date',
                 thStatus: 'Status',
                 thPayBank: 'Payment Bank',
-                thReceipt: 'Receipt',
                 thAction2: 'Action',
-                lblAhli: '🇸🇦 AlAhli:',
-                lblFaransi: '🇫🇷 French Bank:',
-                lblInma: '🇸🇦 AlInma:',
                 totalBalance: 'Total:',
                 totalInvoices: 'Total Payments:',
                 emptySuppliers: 'No suppliers',
@@ -336,8 +359,6 @@
                 delete: '🗑️ Delete',
                 save: '💾 Save',
                 pay: '💰 Pay',
-                uploadReceipt: '📎 Upload Receipt',
-                viewReceipt: '👁️ View',
                 alertFillFields: 'Please fill required fields',
                 alertValidAmount: 'Enter a valid amount',
                 confirmDelete: 'Are you sure?',
@@ -349,7 +370,6 @@
                 placeholderCompanyNew: 'Or enter new name',
                 placeholderAmount: 'Amount',
                 selectDefault: '-- Select Supplier --',
-                selectBank: '-- Select Bank --',
                 paid: 'Paid ✅',
                 unpaid: 'Unpaid ❌',
                 statCount: 'Invoice Count',
@@ -365,7 +385,6 @@
                 repDatePaid: 'Payment Date',
                 repStatus: 'Status',
                 repBank: 'Payment Bank',
-                repReceipt: 'Receipt',
                 allSuppliers: '-- All Suppliers --',
                 invoiceHint: '* Select a supplier from the list or enter a new name in the second field.',
                 balanceNote: '✏️ Balances are updated manually daily (not linked to invoices).',
@@ -377,9 +396,10 @@
                 syncSaved: '✅ Saved to cloud',
                 syncSaveFailed: '❌ Save failed',
                 syncUpdated: '🔄 Updated from another device',
-                receiptUploaded: '✅ Receipt uploaded successfully',
-                receiptFailed: '❌ Failed to upload receipt',
-                noReceipt: 'No receipt'
+                lblAhliHufuf: '🇸🇦 AlAhli (Hufuf)',
+                lblAhliMubarraz: '🇸🇦 AlAhli (Mubarraz)',
+                lblFaransi: '🇫🇷 French Bank',
+                lblInma: '🇸🇦 AlInma'
             }
         };
 
@@ -402,14 +422,13 @@
                     const cloudData = doc.data();
                     if (cloudData && cloudData.suppliers) {
                         data = cloudData;
-                        if (!data.balances) data.balances = { ahli: 0, faransi: 0, inma: 0 };
+                        if (!data.balances) data.balances = { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 };
                         if (!data.invoices) data.invoices = [];
                         data.invoices.forEach(inv => {
                             if (!inv.date) inv.date = getToday();
                             if (inv.paid === undefined) inv.paid = false;
                             if (!inv.payBank) inv.payBank = '';
                             if (!inv.payDate) inv.payDate = '';
-                            if (!inv.receiptUrl) inv.receiptUrl = '';
                         });
                         refreshAll();
                         setSyncStatus(LANG[currentLang].syncLoaded, 'saved');
@@ -444,24 +463,6 @@
         }
 
         // ============================================================
-        //  رفع الإيصال إلى Firebase Storage
-        // ============================================================
-        async function uploadReceipt(invoiceId, file) {
-            if (!file) return;
-            try {
-                const storageRef = storage.ref(`receipts/${invoiceId}_${file.name}`);
-                const uploadTask = storageRef.put(file);
-                uploadTask.on('state_changed', null, null);
-                await uploadTask;
-                const downloadURL = await storageRef.getDownloadURL();
-                return downloadURL;
-            } catch (error) {
-                console.error('Upload failed:', error);
-                return null;
-            }
-        }
-
-        // ============================================================
         //  العرض
         // ============================================================
         function renderSuppliers() {
@@ -489,7 +490,7 @@
         function renderInvoices() {
             const tbody = document.getElementById('invoiceBody');
             if (data.invoices.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">${LANG[currentLang].emptyInvoices}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyInvoices}</td></tr>`;
                 document.getElementById('totalInvoices').innerHTML = `${LANG[currentLang].totalInvoices} 0.00 ريال`;
                 return;
             }
@@ -501,21 +502,6 @@
                     `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
                 const payBank = inv.payBank || '-';
                 const dateDisplay = formatDate(inv.date, currentLang);
-                const payDateDisplay = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
-                
-                // عرض الإيصال
-                let receiptHtml = '-';
-                if (inv.paid && inv.receiptUrl) {
-                    receiptHtml = `<a href="${inv.receiptUrl}" target="_blank" class="receipt-link">${LANG[currentLang].viewReceipt}</a>`;
-                } else if (inv.paid && !inv.receiptUrl) {
-                    receiptHtml = `
-                        <span class="receipt-upload">
-                            <input type="file" id="receiptFile_${inv.id}" class="file-input-hidden" accept="image/*,.pdf" onchange="handleReceiptUpload('${inv.id}', this)" />
-                            <button class="btn-sm warning" onclick="document.getElementById('receiptFile_${inv.id}').click()">${LANG[currentLang].uploadReceipt}</button>
-                        </span>
-                    `;
-                }
-                
                 return `
                     <tr>
                         <td>${idx+1}</td>
@@ -524,7 +510,6 @@
                         <td>${dateDisplay}</td>
                         <td>${status}</td>
                         <td>${payBank}</td>
-                        <td>${receiptHtml}</td>
                         <td class="actions">
                             ${!inv.paid ? `<button class="success btn-sm" onclick="markAsPaid('${inv.id}')">${LANG[currentLang].pay}</button>` : ''}
                             <button class="danger btn-sm" onclick="deleteInvoice('${inv.id}')">${LANG[currentLang].delete}</button>
@@ -537,10 +522,11 @@
         }
 
         function renderBalances() {
-            document.getElementById('balAhli').value = data.balances.ahli || 0;
+            document.getElementById('balAhliHufuf').value = data.balances.ahliHufuf || 0;
+            document.getElementById('balAhliMubarraz').value = data.balances.ahliMubarraz || 0;
             document.getElementById('balFaransi').value = data.balances.faransi || 0;
             document.getElementById('balInma').value = data.balances.inma || 0;
-            const sum = (data.balances.ahli || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
+            const sum = (data.balances.ahliHufuf || 0) + (data.balances.ahliMubarraz || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
             document.getElementById('totalBalance').innerHTML = `${LANG[currentLang].totalBalance} ${sum.toFixed(2)} ريال`;
         }
 
@@ -572,28 +558,13 @@
             updateLiveDate();
             document.getElementById('invoiceHint').innerText = LANG[currentLang].invoiceHint;
             document.getElementById('balanceNote').innerText = LANG[currentLang].balanceNote;
+            // تحديث تسميات البنوك
+            document.getElementById('lblAhliHufuf').innerHTML = LANG[currentLang].lblAhliHufuf;
+            document.getElementById('lblAhliMubarraz').innerHTML = LANG[currentLang].lblAhliMubarraz;
+            document.getElementById('lblFaransi').innerHTML = LANG[currentLang].lblFaransi;
+            document.getElementById('lblInma').innerHTML = LANG[currentLang].lblInma;
             saveToCloud();
         }
-
-        // ============================================================
-        //  معالج رفع الإيصال
-        // ============================================================
-        window.handleReceiptUpload = async function(invoiceId, input) {
-            const file = input.files[0];
-            if (!file) return;
-            const url = await uploadReceipt(invoiceId, file);
-            if (url) {
-                const invoice = data.invoices.find(inv => inv.id === invoiceId);
-                if (invoice) {
-                    invoice.receiptUrl = url;
-                    refreshAll();
-                    alert(LANG[currentLang].receiptUploaded);
-                }
-            } else {
-                alert(LANG[currentLang].receiptFailed);
-            }
-            input.value = '';
-        };
 
         // ============================================================
         //  عمليات الموردين
@@ -659,8 +630,7 @@
                 date: getToday(),
                 paid: false,
                 payBank: '',
-                payDate: '',
-                receiptUrl: ''
+                payDate: ''
             });
             document.getElementById('invoiceCompanyNew').value = '';
             document.getElementById('invoiceAmount').value = '';
@@ -686,33 +656,33 @@
         }
 
         // ============================================================
-        //  دفع الفاتورة (بدون تعديل الرصيد)
+        //  دفع الفاتورة (مع قائمة البنوك الجديدة)
         // ============================================================
         function markAsPaid(id) {
             const invoice = data.invoices.find(inv => inv.id === id);
             if (!invoice) return;
             if (!confirm(LANG[currentLang].confirmPay)) return;
 
-            const bankOptions = currentLang === 'ar' ? ['الأهلي', 'الفرنسي', 'الإنماء'] : ['AlAhli', 'French', 'AlInma'];
-            const promptMsg = currentLang === 'ar' ? 
-                'اختر البنك الذي دُفع منه:\n1. الأهلي\n2. الفرنسي\n3. الإنماء' :
-                'Select bank:\n1. AlAhli\n2. French\n3. AlInma';
-            const bankChoice = prompt(promptMsg, '1');
-            let selectedBank = '';
-            if (bankChoice === '1') selectedBank = bankOptions[0];
-            else if (bankChoice === '2') selectedBank = bankOptions[1];
-            else if (bankChoice === '3') selectedBank = bankOptions[2];
-            else { alert(currentLang === 'ar' ? 'تم إلغاء الدفع' : 'Payment cancelled'); return; }
+            const banks = BANK_OPTIONS[currentLang];
+            let msg = currentLang === 'ar' ? 'اختر البنك الذي دُفع منه:\n' : 'Select bank:\n';
+            banks.forEach((b, i) => {
+                msg += `${i+1}. ${b.label}\n`;
+            });
+            const bankChoice = prompt(msg, '1');
+            const idx = parseInt(bankChoice) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= banks.length) {
+                alert(currentLang === 'ar' ? 'تم إلغاء الدفع' : 'Payment cancelled');
+                return;
+            }
+            const selectedBank = banks[idx].value;
 
             invoice.paid = true;
             invoice.payBank = selectedBank;
             invoice.payDate = getToday();
 
-            // ❌ لا يتم خصم أي مبلغ من الرصيد
-
             refreshAll();
-            const msg = currentLang === 'ar' ? `✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}` : `✅ Invoice paid from ${selectedBank}`;
-            alert(msg);
+            const msgSuccess = currentLang === 'ar' ? `✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}` : `✅ Invoice paid from ${selectedBank}`;
+            alert(msgSuccess);
         }
 
         // ============================================================
@@ -737,14 +707,11 @@
 
             const tbody = document.getElementById('reportBody');
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
             } else {
                 tbody.innerHTML = filtered.map((inv, idx) => {
                     const dateAdded = formatDate(inv.date, currentLang);
                     const datePaid = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
-                    const receiptHtml = inv.receiptUrl ? 
-                        `<a href="${inv.receiptUrl}" target="_blank" class="receipt-link">${LANG[currentLang].viewReceipt}</a>` : 
-                        LANG[currentLang].noReceipt;
                     return `
                         <tr>
                             <td>${idx+1}</td>
@@ -754,7 +721,6 @@
                             <td>${datePaid}</td>
                             <td><span class="badge-paid">${LANG[currentLang].paid}</span></td>
                             <td>${inv.payBank || '-'}</td>
-                            <td>${receiptHtml}</td>
                         </tr>
                     `;
                 }).join('');
@@ -774,14 +740,13 @@
                 return;
             }
             const headers = currentLang === 'ar' ? 
-                'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع,الإيصال' :
-                'Company,Amount,Added Date,Payment Date,Bank,Receipt';
+                'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع' :
+                'Company,Amount,Added Date,Payment Date,Bank';
             let csv = headers + '\n';
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
-                if (cols.length >= 8) {
-                    const receiptText = cols[7].innerText.trim();
-                    csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText},${receiptText}\n`;
+                if (cols.length >= 7) {
+                    csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText}\n`;
                 }
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -795,8 +760,12 @@
         // ============================================================
         //  الأرصدة (يدوية فقط)
         // ============================================================
-        document.getElementById('balAhli').addEventListener('input', function() {
-            data.balances.ahli = parseFloat(this.value) || 0;
+        document.getElementById('balAhliHufuf').addEventListener('input', function() {
+            data.balances.ahliHufuf = parseFloat(this.value) || 0;
+            refreshAll();
+        });
+        document.getElementById('balAhliMubarraz').addEventListener('input', function() {
+            data.balances.ahliMubarraz = parseFloat(this.value) || 0;
             refreshAll();
         });
         document.getElementById('balFaransi').addEventListener('input', function() {
@@ -846,11 +815,7 @@
             document.getElementById('thDate').innerText = t.thDate;
             document.getElementById('thStatus').innerText = t.thStatus;
             document.getElementById('thPayBank').innerText = t.thPayBank;
-            document.getElementById('thReceipt').innerText = t.thReceipt;
             document.getElementById('thAction2').innerText = t.thAction2;
-            document.getElementById('lblAhli').innerHTML = `${t.lblAhli} <input type="number" id="balAhli" step="0.01" />`;
-            document.getElementById('lblFaransi').innerHTML = `${t.lblFaransi} <input type="number" id="balFaransi" step="0.01" />`;
-            document.getElementById('lblInma').innerHTML = `${t.lblInma} <input type="number" id="balInma" step="0.01" />`;
             document.getElementById('addSupplierBtn').innerHTML = t.addSupplier;
             document.getElementById('addInvoiceBtn').innerHTML = t.addInvoice;
             document.getElementById('exportReportBtn').innerHTML = t.exportBtn;
@@ -872,12 +837,19 @@
             document.getElementById('repDatePaid').innerText = t.repDatePaid;
             document.getElementById('repStatus').innerText = t.repStatus;
             document.getElementById('repBank').innerText = t.repBank;
-            document.getElementById('repReceipt').innerText = t.repReceipt;
             document.getElementById('invoiceHint').innerText = t.invoiceHint;
             document.getElementById('balanceNote').innerText = t.balanceNote;
+            document.getElementById('lblAhliHufuf').innerHTML = t.lblAhliHufuf;
+            document.getElementById('lblAhliMubarraz').innerHTML = t.lblAhliMubarraz;
+            document.getElementById('lblFaransi').innerHTML = t.lblFaransi;
+            document.getElementById('lblInma').innerHTML = t.lblInma;
 
-            document.getElementById('balAhli').addEventListener('input', function() {
-                data.balances.ahli = parseFloat(this.value) || 0;
+            document.getElementById('balAhliHufuf').addEventListener('input', function() {
+                data.balances.ahliHufuf = parseFloat(this.value) || 0;
+                refreshAll();
+            });
+            document.getElementById('balAhliMubarraz').addEventListener('input', function() {
+                data.balances.ahliMubarraz = parseFloat(this.value) || 0;
                 refreshAll();
             });
             document.getElementById('balFaransi').addEventListener('input', function() {
@@ -958,14 +930,13 @@
                         const newStr = JSON.stringify(cloudData);
                         if (newStr !== JSON.stringify(data)) {
                             data = cloudData;
-                            if (!data.balances) data.balances = { ahli: 0, faransi: 0, inma: 0 };
+                            if (!data.balances) data.balances = { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 };
                             if (!data.invoices) data.invoices = [];
                             data.invoices.forEach(inv => {
                                 if (!inv.date) inv.date = getToday();
                                 if (inv.paid === undefined) inv.paid = false;
                                 if (!inv.payBank) inv.payBank = '';
                                 if (!inv.payDate) inv.payDate = '';
-                                if (!inv.receiptUrl) inv.receiptUrl = '';
                             });
                             refreshAll();
                             setSyncStatus(LANG[currentLang].syncUpdated, 'saved');
@@ -977,7 +948,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع رفع الإيصالات وأرصدة يدوية');
+        console.log('✅ النظام جاهز مع البنوك الجديدة (الأهلي الهفوف، الأهلي المبرز، الفرنسي، الإنماء)');
     </script>
 </body>
 </html>
