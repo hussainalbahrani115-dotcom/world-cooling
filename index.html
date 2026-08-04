@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مؤسسة آفاق التبريد التجارية - World Cooling Trading</title>
+    <title>مؤسسة آفاق التبريد التجارية - World Cooling Trade</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -78,7 +78,7 @@
             <button class="tab-btn" data-page="page3" id="tab3">📄 الفواتير</button>
         </div>
 
-        <!-- الصفحات (نفسها) -->
+        <!-- الصفحات -->
         <div class="page active" id="page1">
             <div class="card">
                 <h2 id="titleSuppliers">🗂️ إدارة الموردين</h2>
@@ -127,17 +127,18 @@
 
     <script>
         // ============================================================
-        //  1. إعداد Firebase (استبدل هذه القيم بقيم مشروعك)
+        //  1. إعداد Firebase ⚠️ استبدل القيم التالية ببيانات مشروعك
         // ============================================================
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "YOUR_API_KEY",                // ⬅️ استبدل
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // ⬅️ استبدل
+            projectId: "YOUR_PROJECT_ID",          // ⬅️ استبدل
+            storageBucket: "YOUR_PROJECT_ID.appspot.com", // ⬅️ استبدل
+            messagingSenderId: "YOUR_SENDER_ID",   // ⬅️ استبدل
+            appId: "YOUR_APP_ID"                   // ⬅️ استبدل
         };
 
+        // تهيئة Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -154,7 +155,7 @@
         let lastSavedData = '';
 
         // ============================================================
-        //  3. الترجمة (نفسها)
+        //  3. الترجمة
         // ============================================================
         const LANG = {
             ar: {
@@ -226,7 +227,6 @@
             } catch (error) {
                 console.error('❌ خطأ في التحميل:', error);
                 setSyncStatus('❌ خطأ في الاتصال بالسحابة', 'error');
-                // نستخدم البيانات المحلية إن وجدت
                 refreshAll();
             }
         }
@@ -235,7 +235,6 @@
         async function saveToCloud() {
             const currentDataStr = JSON.stringify(data);
             if (currentDataStr === lastSavedData && lastSavedData !== '') {
-                // لا تغيير
                 return;
             }
             if (isSaving) return;
@@ -255,7 +254,7 @@
         }
 
         // ============================================================
-        //  5. دوال العرض والتعديل (نفسها مع إضافة حفظ تلقائي)
+        //  5. دوال العرض والتعديل
         // ============================================================
         function renderSuppliers() {
             const tbody = document.getElementById('supplierBody');
@@ -314,12 +313,11 @@
             renderSuppliers();
             renderInvoices();
             renderBalances();
-            // حفظ تلقائي بعد كل تغيير
             saveToCloud();
         }
 
         // ============================================================
-        //  6. العمليات (نفسها مع استدعاء refreshAll)
+        //  6. العمليات
         // ============================================================
         function addSupplier() {
             const name = document.getElementById('supplierName').value.trim();
@@ -478,18 +476,16 @@
         });
 
         // ============================================================
-        //  10. التهيئة - تحميل من السحابة أولاً
+        //  10. التهيئة - تحميل من السحابة
         // ============================================================
-        // نحمّل البيانات من السحابة عند بدء التشغيل
         (async function init() {
             await loadFromCloud();
             applyLanguage('ar');
-            // نستمع للتغييرات في السحابة (تحديث لحظي من الأجهزة الأخرى)
+            // استماع للتحديثات اللحظية من الأجهزة الأخرى
             db.collection('appData').doc('mainData').onSnapshot((doc) => {
                 if (doc.exists) {
                     const cloudData = doc.data();
                     if (cloudData) {
-                        // تجنب إعادة التحديث إذا كانت البيانات نفسها
                         const newStr = JSON.stringify(cloudData);
                         if (newStr !== JSON.stringify(data)) {
                             data = cloudData;
