@@ -4,30 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مؤسسة آفاق التبريد التجارية - World Cooling Trade</title>
-    
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f14; color: #e6edf3; padding: 16px; transition: 0.3s; }
         body.ltr { direction: ltr; text-align: left; }
         .container { max-width: 1100px; margin: auto; }
-        .brand-header {
-            text-align: center;
-            padding: 25px 0 18px;
-            border-bottom: 3px solid #1f6feb;
-            margin-bottom: 22px;
-            background: linear-gradient(145deg, #0d1a2b, #0b0f14);
-            border-radius: 20px;
-            box-shadow: 0 0 30px #1f6feb22;
-        }
+        .brand-header { text-align: center; padding: 25px 0 18px; border-bottom: 3px solid #1f6feb; margin-bottom: 22px; background: linear-gradient(145deg, #0d1a2b, #0b0f14); border-radius: 20px; box-shadow: 0 0 30px #1f6feb22; }
         .brand-ar { font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 2px; text-shadow: 0 0 20px #1f6feb99; }
         .brand-en { font-size: 22px; font-weight: 300; color: #8ab4f8; letter-spacing: 4px; margin-top: 6px; text-transform: uppercase; }
         .brand-sub { font-size: 14px; color: #8b949e; margin-top: 10px; border-top: 1px solid #1f6feb44; padding-top: 10px; display: inline-block; padding-left: 20px; padding-right: 20px; }
-        body.ltr .brand-ar { font-size: 30px; }
-        body.ltr .brand-en { font-size: 26px; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
         .tab-btn { background: #21262d; border: none; color: #8b949e; padding: 12px 28px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .tab-btn.active { background: #1f6feb; color: white; box-shadow: 0 0 20px #1f6feb66; }
@@ -38,11 +25,13 @@
         .card { background: #161b22; border-radius: 16px; padding: 22px; margin-bottom: 20px; border: 1px solid #30363d; }
         .card h2 { margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px; color: #58a6ff; font-size: 22px; }
         .flex-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; }
-        .flex-row input { padding: 10px 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; flex: 1 1 160px; min-width: 140px; }
+        .flex-row input, .flex-row select { padding: 10px 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; flex: 1 1 160px; min-width: 140px; }
         .flex-row button { padding: 10px 20px; border-radius: 8px; border: none; background: #1f6feb; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .flex-row button:hover { background: #388bfd; }
         .flex-row button.danger { background: #da3633; }
         .flex-row button.danger:hover { background: #f85149; }
+        .flex-row button.success { background: #238636; }
+        .flex-row button.success:hover { background: #2ea043; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         th, td { padding: 10px; border-bottom: 1px solid #30363d; text-align: right; }
         body.ltr th, body.ltr td { text-align: left; }
@@ -55,6 +44,7 @@
         .sync-status { position: fixed; bottom: 20px; right: 20px; background: #1f6feb; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; box-shadow: 0 0 20px #1f6feb55; z-index: 999; }
         .sync-status.saved { background: #238636; }
         .sync-status.error { background: #da3633; }
+        .inline-flex { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -72,22 +62,25 @@
             <button class="tab-btn" data-page="page3" id="tab3">📄 الفواتير</button>
         </div>
 
+        <!-- ====== صفحة الموردين ====== -->
         <div class="page active" id="page1">
             <div class="card">
                 <h2 id="titleSuppliers">🗂️ إدارة الموردين</h2>
                 <div class="flex-row">
-                    <input type="text" id="supplierName" placeholder="اسم المورد" />
+                    <input type="text" id="supplierNameAr" placeholder="الاسم بالعربي" />
+                    <input type="text" id="supplierNameEn" placeholder="الاسم بالإنجليزي" />
                     <input type="text" id="supplierBank" placeholder="اسم البنك" />
                     <input type="text" id="supplierIban" placeholder="رقم IBAN" />
                     <button id="addSupplierBtn">➕ إضافة</button>
                 </div>
                 <table>
-                    <thead><tr><th>#</th><th id="thName">اسم المورد</th><th id="thBank">البنك</th><th id="thIban">IBAN</th><th id="thAction">إجراء</th></tr></thead>
+                    <thead><tr><th>#</th><th id="thNameAr">الاسم بالعربي</th><th id="thNameEn">الاسم بالإنجليزي</th><th id="thBank">البنك</th><th id="thIban">IBAN</th><th id="thAction">إجراء</th></tr></thead>
                     <tbody id="supplierBody"></tbody>
                 </table>
             </div>
         </div>
 
+        <!-- ====== صفحة الأرصدة ====== -->
         <div class="page" id="page2">
             <div class="card">
                 <h2 id="titleBalances">🏦 الأرصدة البنكية</h2>
@@ -100,14 +93,19 @@
             </div>
         </div>
 
+        <!-- ====== صفحة الفواتير ====== -->
         <div class="page" id="page3">
             <div class="card">
                 <h2 id="titleInvoices">📄 الفواتير المستحقة للسداد</h2>
                 <div class="flex-row">
-                    <input type="text" id="invoiceCompany" placeholder="اسم الشركة" />
+                    <select id="invoiceSupplierSelect" style="flex:2;min-width:200px;">
+                        <option value="">-- اختر مورد من القائمة --</option>
+                    </select>
+                    <input type="text" id="invoiceCompanyNew" placeholder="أو اكتب اسم جديد" />
                     <input type="number" id="invoiceAmount" placeholder="المبلغ" step="0.01" />
                     <button id="addInvoiceBtn">➕ إضافة فاتورة</button>
                 </div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
                 <table>
                     <thead><tr><th>#</th><th id="thCompany">الشركة</th><th id="thAmount">المبلغ</th><th id="thAction2">إجراء</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
@@ -119,61 +117,114 @@
 
     <script>
         // ============================================================
-        //  بيانات Firebase الصحيحة (تم تعديلها)
+        //  🔥 بيانات Firebase (استبدلها ببياناتك)
         // ============================================================
         const firebaseConfig = {
-            apiKey: "AIzaSyAcQUA7XHudSDku_hQCBbOjbrjzPnJTt3A",
+            apiKey: "AIzaSyAcQUA7XHudSDku_hQCB0bjrzPnJTt3A",
             authDomain: "world-cooling.firebaseapp.com",
             projectId: "world-cooling",
             storageBucket: "world-cooling.firebasestorage.app",
             messagingSenderId: "33761426937",
-            appId: "1:33761426937:web:a0b87ef02d60b8d86c1128"
+            appId: "1:33761426937:web:a0b87ef02d6b8d86c1128"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let data = { suppliers: [], balances: { ahli: 0, faransi: 0, inma: 0 }, invoices: [] };
+        // ============================================================
+        //  البيانات
+        // ============================================================
+        let data = {
+            suppliers: [],  // { id, nameAr, nameEn, bank, iban }
+            balances: { ahli: 0, faransi: 0, inma: 0 },
+            invoices: []    // { id, company, amount }
+        };
+
         let isSaving = false;
         let lastSavedData = '';
 
-        // الترجمة
+        // ============================================================
+        //  الترجمة
+        // ============================================================
         const LANG = {
             ar: {
                 brandSub: '⏣ نظام إدارة الموردين والفواتير - سحابي',
                 tab1: '🗂️ الموردين', tab2: '🏦 الأرصدة', tab3: '📄 الفواتير',
-                titleSuppliers: '🗂️ إدارة الموردين', titleBalances: '🏦 الأرصدة البنكية', titleInvoices: '📄 الفواتير المستحقة للسداد',
-                thName: 'اسم المورد', thBank: 'البنك', thIban: 'IBAN', thAction: 'إجراء',
-                thCompany: 'الشركة', thAmount: 'المبلغ', thAction2: 'إجراء',
-                lblAhli: '🇸🇦 الأهلي:', lblFaransi: '🇫🇷 الفرنسي:', lblInma: '🇸🇦 الإنماء:',
-                totalBalance: 'المجموع:', totalInvoices: 'إجمالي المدفوعات:',
-                emptySuppliers: 'لا يوجد موردون', emptyInvoices: 'لا توجد فواتير',
-                addSupplier: '➕ إضافة', addInvoice: '➕ إضافة فاتورة',
-                delete: '🗑️ حذف', save: '💾 حفظ',
-                alertFillFields: 'الرجاء ملء جميع الحقول', alertValidAmount: 'أدخل مبلغاً صحيحاً',
+                titleSuppliers: '🗂️ إدارة الموردين',
+                titleBalances: '🏦 الأرصدة البنكية',
+                titleInvoices: '📄 الفواتير المستحقة للسداد',
+                thNameAr: 'الاسم بالعربي',
+                thNameEn: 'الاسم بالإنجليزي',
+                thBank: 'البنك',
+                thIban: 'IBAN',
+                thAction: 'إجراء',
+                thCompany: 'الشركة',
+                thAmount: 'المبلغ',
+                thAction2: 'إجراء',
+                lblAhli: '🇸🇦 الأهلي:',
+                lblFaransi: '🇫🇷 الفرنسي:',
+                lblInma: '🇸🇦 الإنماء:',
+                totalBalance: 'المجموع:',
+                totalInvoices: 'إجمالي المدفوعات:',
+                emptySuppliers: 'لا يوجد موردون',
+                emptyInvoices: 'لا توجد فواتير',
+                addSupplier: '➕ إضافة',
+                addInvoice: '➕ إضافة فاتورة',
+                delete: '🗑️ حذف',
+                save: '💾 حفظ',
+                alertFillFields: 'الرجاء ملء الحقول المطلوبة',
+                alertValidAmount: 'أدخل مبلغاً صحيحاً',
                 confirmDelete: 'هل أنت متأكد من الحذف؟',
-                placeholderSupplierName: 'اسم المورد', placeholderSupplierBank: 'اسم البنك', placeholderSupplierIban: 'رقم IBAN',
-                placeholderInvoiceCompany: 'اسم الشركة', placeholderInvoiceAmount: 'المبلغ'
+                placeholderNameAr: 'الاسم بالعربي',
+                placeholderNameEn: 'الاسم بالإنجليزي',
+                placeholderBank: 'اسم البنك',
+                placeholderIban: 'رقم IBAN',
+                placeholderCompanyNew: 'أو اكتب اسم جديد',
+                placeholderAmount: 'المبلغ',
+                selectDefault: '-- اختر مورد من القائمة --'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
                 tab1: '🗂️ Suppliers', tab2: '🏦 Balances', tab3: '📄 Invoices',
-                titleSuppliers: '🗂️ Supplier Management', titleBalances: '🏦 Bank Balances', titleInvoices: '📄 Pending Invoices',
-                thName: 'Supplier Name', thBank: 'Bank', thIban: 'IBAN', thAction: 'Action',
-                thCompany: 'Company', thAmount: 'Amount', thAction2: 'Action',
-                lblAhli: '🇸🇦 AlAhli:', lblFaransi: '🇫🇷 French Bank:', lblInma: '🇸🇦 AlInma:',
-                totalBalance: 'Total:', totalInvoices: 'Total Payments:',
-                emptySuppliers: 'No suppliers', emptyInvoices: 'No invoices',
-                addSupplier: '➕ Add', addInvoice: '➕ Add Invoice',
-                delete: '🗑️ Delete', save: '💾 Save',
-                alertFillFields: 'Fill all fields', alertValidAmount: 'Enter valid amount',
+                titleSuppliers: '🗂️ Supplier Management',
+                titleBalances: '🏦 Bank Balances',
+                titleInvoices: '📄 Pending Invoices',
+                thNameAr: 'Name (Arabic)',
+                thNameEn: 'Name (English)',
+                thBank: 'Bank',
+                thIban: 'IBAN',
+                thAction: 'Action',
+                thCompany: 'Company',
+                thAmount: 'Amount',
+                thAction2: 'Action',
+                lblAhli: '🇸🇦 AlAhli:',
+                lblFaransi: '🇫🇷 French Bank:',
+                lblInma: '🇸🇦 AlInma:',
+                totalBalance: 'Total:',
+                totalInvoices: 'Total Payments:',
+                emptySuppliers: 'No suppliers',
+                emptyInvoices: 'No invoices',
+                addSupplier: '➕ Add',
+                addInvoice: '➕ Add Invoice',
+                delete: '🗑️ Delete',
+                save: '💾 Save',
+                alertFillFields: 'Please fill required fields',
+                alertValidAmount: 'Enter a valid amount',
                 confirmDelete: 'Are you sure?',
-                placeholderSupplierName: 'Supplier Name', placeholderSupplierBank: 'Bank Name', placeholderSupplierIban: 'IBAN',
-                placeholderInvoiceCompany: 'Company', placeholderInvoiceAmount: 'Amount'
+                placeholderNameAr: 'Name (Arabic)',
+                placeholderNameEn: 'Name (English)',
+                placeholderBank: 'Bank Name',
+                placeholderIban: 'IBAN',
+                placeholderCompanyNew: 'Or enter new name',
+                placeholderAmount: 'Amount',
+                selectDefault: '-- Select Supplier --'
             }
         };
         let currentLang = 'ar';
 
+        // ============================================================
+        //  المزامنة
+        // ============================================================
         function setSyncStatus(text, type = 'loading') {
             const el = document.getElementById('syncStatus');
             el.innerText = text;
@@ -218,22 +269,26 @@
                 setSyncStatus('✅ تم الحفظ في السحابة', 'saved');
             } catch (error) {
                 console.error(error);
-                setSyncStatus('❌ فشل الحفظ - تحقق من الإنترنت', 'error');
+                setSyncStatus('❌ فشل الحفظ', 'error');
             } finally {
                 isSaving = false;
             }
         }
 
+        // ============================================================
+        //  العرض
+        // ============================================================
         function renderSuppliers() {
             const tbody = document.getElementById('supplierBody');
             if (data.suppliers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">${LANG[currentLang].emptySuppliers}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-msg">${LANG[currentLang].emptySuppliers}</td></tr>`;
                 return;
             }
             tbody.innerHTML = data.suppliers.map((s, idx) => `
                 <tr>
                     <td>${idx+1}</td>
-                    <td><input type="text" value="${s.name}" data-id="${s.id}" class="edit-supplier-name" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="${s.nameAr}" data-id="${s.id}" class="edit-supplier-nameAr" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="${s.nameEn || ''}" data-id="${s.id}" class="edit-supplier-nameEn" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                     <td><input type="text" value="${s.bank || ''}" data-id="${s.id}" class="edit-supplier-bank" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                     <td><input type="text" value="${s.iban}" data-id="${s.id}" class="edit-supplier-iban" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                     <td class="actions">
@@ -242,6 +297,7 @@
                     </td>
                 </tr>
             `).join('');
+            updateSupplierDropdown();
         }
 
         function renderInvoices() {
@@ -277,6 +333,17 @@
             document.getElementById('totalBalance').innerText = `${LANG[currentLang].totalBalance} ${sum.toFixed(2)} ريال`;
         }
 
+        function updateSupplierDropdown() {
+            const select = document.getElementById('invoiceSupplierSelect');
+            const currentVal = select.value;
+            select.innerHTML = `<option value="">${LANG[currentLang].selectDefault}</option>`;
+            data.suppliers.forEach(s => {
+                const label = s.nameAr + (s.nameEn ? ` (${s.nameEn})` : '');
+                select.innerHTML += `<option value="${s.nameAr}">${label}</option>`;
+            });
+            if (currentVal) select.value = currentVal;
+        }
+
         function refreshAll() {
             renderSuppliers();
             renderInvoices();
@@ -284,13 +351,18 @@
             saveToCloud();
         }
 
+        // ============================================================
+        //  عمليات الموردين
+        // ============================================================
         function addSupplier() {
-            const name = document.getElementById('supplierName').value.trim();
+            const nameAr = document.getElementById('supplierNameAr').value.trim();
+            const nameEn = document.getElementById('supplierNameEn').value.trim();
             const bank = document.getElementById('supplierBank').value.trim();
             const iban = document.getElementById('supplierIban').value.trim();
-            if (!name || !iban) { alert(LANG[currentLang].alertFillFields); return; }
-            data.suppliers.push({ id: crypto.randomUUID(), name, bank, iban });
-            document.getElementById('supplierName').value = '';
+            if (!nameAr || !iban) { alert(LANG[currentLang].alertFillFields); return; }
+            data.suppliers.push({ id: crypto.randomUUID(), nameAr, nameEn, bank, iban });
+            document.getElementById('supplierNameAr').value = '';
+            document.getElementById('supplierNameEn').value = '';
             document.getElementById('supplierBank').value = '';
             document.getElementById('supplierIban').value = '';
             refreshAll();
@@ -303,26 +375,43 @@
         }
 
         function updateSupplier(id) {
-            const nameInput = document.querySelector(`.edit-supplier-name[data-id="${id}"]`);
+            const nameArInput = document.querySelector(`.edit-supplier-nameAr[data-id="${id}"]`);
+            const nameEnInput = document.querySelector(`.edit-supplier-nameEn[data-id="${id}"]`);
             const bankInput = document.querySelector(`.edit-supplier-bank[data-id="${id}"]`);
             const ibanInput = document.querySelector(`.edit-supplier-iban[data-id="${id}"]`);
-            if (!nameInput || !ibanInput) return;
+            if (!nameArInput || !ibanInput) return;
             const supplier = data.suppliers.find(s => s.id === id);
             if (supplier) {
-                supplier.name = nameInput.value.trim() || supplier.name;
+                supplier.nameAr = nameArInput.value.trim() || supplier.nameAr;
+                supplier.nameEn = nameEnInput.value.trim() || supplier.nameEn;
                 supplier.bank = bankInput.value.trim() || supplier.bank;
                 supplier.iban = ibanInput.value.trim() || supplier.iban;
                 refreshAll();
             }
         }
 
+        // ============================================================
+        //  عمليات الفواتير
+        // ============================================================
         function addInvoice() {
-            const company = document.getElementById('invoiceCompany').value.trim();
+            const selectedSupplier = document.getElementById('invoiceSupplierSelect').value.trim();
+            const newCompany = document.getElementById('invoiceCompanyNew').value.trim();
             const amount = parseFloat(document.getElementById('invoiceAmount').value);
-            if (!company || isNaN(amount) || amount <= 0) { alert(LANG[currentLang].alertValidAmount); return; }
+
+            let company = selectedSupplier;
+            if (newCompany && !selectedSupplier) {
+                company = newCompany;
+            } else if (!selectedSupplier && !newCompany) {
+                alert(LANG[currentLang].alertFillFields);
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0) { alert(LANG[currentLang].alertValidAmount); return; }
+
             data.invoices.push({ id: crypto.randomUUID(), company, amount });
-            document.getElementById('invoiceCompany').value = '';
+            document.getElementById('invoiceCompanyNew').value = '';
             document.getElementById('invoiceAmount').value = '';
+            // لا نمسح القائمة المنسدلة حتى يبقى الاختيار
             refreshAll();
         }
 
@@ -344,6 +433,7 @@
             }
         }
 
+        // الأرصدة
         document.getElementById('balAhli').addEventListener('input', function() {
             data.balances.ahli = parseFloat(this.value) || 0;
             refreshAll();
@@ -357,6 +447,16 @@
             refreshAll();
         });
 
+        // اختيار مورد من القائمة يملأ الحقل الجديد تلقائياً (اختياري)
+        document.getElementById('invoiceSupplierSelect').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('invoiceCompanyNew').value = this.value;
+            }
+        });
+
+        // ============================================================
+        //  اللغة
+        // ============================================================
         function applyLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
@@ -367,7 +467,8 @@
             document.getElementById('titleSuppliers').innerText = t.titleSuppliers;
             document.getElementById('titleBalances').innerText = t.titleBalances;
             document.getElementById('titleInvoices').innerText = t.titleInvoices;
-            document.getElementById('thName').innerText = t.thName;
+            document.getElementById('thNameAr').innerText = t.thNameAr;
+            document.getElementById('thNameEn').innerText = t.thNameEn;
             document.getElementById('thBank').innerText = t.thBank;
             document.getElementById('thIban').innerText = t.thIban;
             document.getElementById('thAction').innerText = t.thAction;
@@ -379,11 +480,14 @@
             document.getElementById('lblInma').innerHTML = `${t.lblInma} <input type="number" id="balInma" step="0.01" />`;
             document.getElementById('addSupplierBtn').innerHTML = t.addSupplier;
             document.getElementById('addInvoiceBtn').innerHTML = t.addInvoice;
-            document.getElementById('supplierName').placeholder = t.placeholderSupplierName;
-            document.getElementById('supplierBank').placeholder = t.placeholderSupplierBank;
-            document.getElementById('supplierIban').placeholder = t.placeholderSupplierIban;
-            document.getElementById('invoiceCompany').placeholder = t.placeholderInvoiceCompany;
-            document.getElementById('invoiceAmount').placeholder = t.placeholderInvoiceAmount;
+            document.getElementById('supplierNameAr').placeholder = t.placeholderNameAr;
+            document.getElementById('supplierNameEn').placeholder = t.placeholderNameEn;
+            document.getElementById('supplierBank').placeholder = t.placeholderBank;
+            document.getElementById('supplierIban').placeholder = t.placeholderIban;
+            document.getElementById('invoiceCompanyNew').placeholder = t.placeholderCompanyNew;
+            document.getElementById('invoiceAmount').placeholder = t.placeholderAmount;
+
+            // إعادة ربط الأحداث
             document.getElementById('balAhli').addEventListener('input', function() {
                 data.balances.ahli = parseFloat(this.value) || 0;
                 refreshAll();
@@ -396,6 +500,7 @@
                 data.balances.inma = parseFloat(this.value) || 0;
                 refreshAll();
             });
+            updateSupplierDropdown();
             refreshAll();
         }
 
@@ -407,6 +512,9 @@
             applyLanguage(newLang);
         });
 
+        // ============================================================
+        //  التنقل
+        // ============================================================
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -416,19 +524,26 @@
             });
         });
 
+        // ============================================================
+        //  ربط الأزرار
+        // ============================================================
         document.getElementById('addSupplierBtn').addEventListener('click', addSupplier);
         document.getElementById('addInvoiceBtn').addEventListener('click', addInvoice);
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                if (['supplierName','supplierBank','supplierIban'].includes(document.activeElement.id)) {
+                const activeId = document.activeElement.id;
+                if (['supplierNameAr','supplierNameEn','supplierBank','supplierIban'].includes(activeId)) {
                     addSupplier();
-                } else if (['invoiceCompany','invoiceAmount'].includes(document.activeElement.id)) {
+                } else if (['invoiceCompanyNew','invoiceAmount'].includes(activeId)) {
                     addInvoice();
                 }
             }
         });
 
+        // ============================================================
+        //  التهيئة
+        // ============================================================
         (async function init() {
             await loadFromCloud();
             applyLanguage('ar');
@@ -449,7 +564,7 @@
             });
         })();
 
-        console.log('✅ النظام جاهز');
+        console.log('✅ النظام جاهز مع إضافة الاسم بالعربي والإنجليزي وقائمة الموردين في الفواتير');
     </script>
 </body>
 </html>
