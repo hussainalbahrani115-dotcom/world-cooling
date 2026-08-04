@@ -115,7 +115,7 @@
                     <input type="number" id="invoiceAmount" placeholder="المبلغ" step="0.01" />
                     <button id="addInvoiceBtn">➕ إضافة فاتورة</button>
                 </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;" id="invoiceHint">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
                 <table>
                     <thead><tr><th>#</th><th id="thCompany">الشركة</th><th id="thAmount">المبلغ</th><th id="thDate">تاريخ الإضافة</th><th id="thStatus">الحالة</th><th id="thPayBank">بنك الدفع</th><th id="thAction2">إجراء</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
@@ -186,6 +186,7 @@
 
         let isSaving = false;
         let lastSavedData = '';
+        let currentLang = 'ar';
 
         // ============================================================
         //  دوال التاريخ
@@ -194,29 +195,27 @@
             return new Date().toISOString().slice(0,10);
         }
 
-        function formatDate(dateStr) {
+        function formatDate(dateStr, lang) {
             if (!dateStr) return '-';
             const d = new Date(dateStr + 'T00:00:00');
+            if (lang === 'en') {
+                return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
             return d.toLocaleDateString('ar-EG');
-        }
-
-        function formatDateEn(dateStr) {
-            if (!dateStr) return '-';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US');
         }
 
         function updateLiveDate() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            const arDate = now.toLocaleDateString('ar-EG', options);
-            const enDate = now.toLocaleDateString('en-US', options);
-            document.getElementById('liveDate').innerHTML = 
-                currentLang === 'ar' ? `📅 اليوم: ${arDate}` : `📅 Today: ${enDate}`;
+            if (currentLang === 'en') {
+                document.getElementById('liveDate').innerHTML = `📅 Today: ${now.toLocaleDateString('en-US', options)}`;
+            } else {
+                document.getElementById('liveDate').innerHTML = `📅 اليوم: ${now.toLocaleDateString('ar-EG', options)}`;
+            }
         }
 
         // ============================================================
-        //  الترجمة (كاملة بالعربي والإنجليزي)
+        //  الترجمة الكاملة (جميع النصوص)
         // ============================================================
         const LANG = {
             ar: {
@@ -277,7 +276,16 @@
                 repDatePaid: 'تاريخ الدفع',
                 repStatus: 'الحالة',
                 repBank: 'بنك الدفع',
-                allSuppliers: '-- جميع الموردين --'
+                allSuppliers: '-- جميع الموردين --',
+                invoiceHint: '* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.',
+                syncLoading: '🔄 جارٍ المزامنة...',
+                syncLoaded: '✅ تم التحميل من السحابة',
+                syncNoData: '📡 لا توجد بيانات سحابية، نبدأ من جديد',
+                syncError: '❌ خطأ في الاتصال بالسحابة',
+                syncSaving: '⏳ جارٍ الحفظ...',
+                syncSaved: '✅ تم الحفظ في السحابة',
+                syncSaveFailed: '❌ فشل الحفظ',
+                syncUpdated: '🔄 تم التحديث من جهاز آخر'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -337,10 +345,18 @@
                 repDatePaid: 'Payment Date',
                 repStatus: 'Status',
                 repBank: 'Payment Bank',
-                allSuppliers: '-- All Suppliers --'
+                allSuppliers: '-- All Suppliers --',
+                invoiceHint: '* Select a supplier from the list or enter a new name in the second field.',
+                syncLoading: '🔄 Loading...',
+                syncLoaded: '✅ Loaded from cloud',
+                syncNoData: '📡 No cloud data, starting fresh',
+                syncError: '❌ Cloud connection error',
+                syncSaving: '⏳ Saving...',
+                syncSaved: '✅ Saved to cloud',
+                syncSaveFailed: '❌ Save failed',
+                syncUpdated: '🔄 Updated from another device'
             }
         };
-        let currentLang = 'ar';
 
         // ============================================================
         //  المزامنة
@@ -355,7 +371,7 @@
 
         async function loadFromCloud() {
             try {
-                setSyncStatus('🔄 Loading...', 'loading');
+                setSyncStatus(LANG[currentLang].syncLoading, 'loading');
                 const doc = await db.collection('appData').doc('mainData').get();
                 if (doc.exists) {
                     const cloudData = doc.data();
@@ -370,15 +386,15 @@
                             if (!inv.payDate) inv.payDate = '';
                         });
                         refreshAll();
-                        setSyncStatus('✅ Loaded from cloud', 'saved');
+                        setSyncStatus(LANG[currentLang].syncLoaded, 'saved');
                         return;
                     }
                 }
-                setSyncStatus('📡 No cloud data, starting fresh', 'saved');
+                setSyncStatus(LANG[currentLang].syncNoData, 'saved');
                 refreshAll();
             } catch (error) {
                 console.error(error);
-                setSyncStatus('❌ Cloud connection error', 'error');
+                setSyncStatus(LANG[currentLang].syncError, 'error');
                 refreshAll();
             }
         }
@@ -389,13 +405,13 @@
             if (isSaving) return;
             isSaving = true;
             try {
-                setSyncStatus('⏳ Saving...', 'loading');
+                setSyncStatus(LANG[currentLang].syncSaving, 'loading');
                 await db.collection('appData').doc('mainData').set(data);
                 lastSavedData = currentDataStr;
-                setSyncStatus('✅ Saved to cloud', 'saved');
+                setSyncStatus(LANG[currentLang].syncSaved, 'saved');
             } catch (error) {
                 console.error(error);
-                setSyncStatus('❌ Save failed', 'error');
+                setSyncStatus(LANG[currentLang].syncSaveFailed, 'error');
             } finally {
                 isSaving = false;
             }
@@ -430,7 +446,7 @@
             const tbody = document.getElementById('invoiceBody');
             if (data.invoices.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyInvoices}</td></tr>`;
-                document.getElementById('totalInvoices').innerText = `${LANG[currentLang].totalInvoices} 0.00 ريال`;
+                document.getElementById('totalInvoices').innerHTML = `${LANG[currentLang].totalInvoices} 0.00 ريال`;
                 return;
             }
             let total = 0;
@@ -440,8 +456,8 @@
                     `<span class="badge-paid">${LANG[currentLang].paid}</span>` : 
                     `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
                 const payBank = inv.payBank || '-';
-                const dateDisplay = currentLang === 'ar' ? formatDate(inv.date) : formatDateEn(inv.date);
-                const payDateDisplay = inv.payDate ? (currentLang === 'ar' ? formatDate(inv.payDate) : formatDateEn(inv.payDate)) : '-';
+                const dateDisplay = formatDate(inv.date, currentLang);
+                const payDateDisplay = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
                 return `
                     <tr>
                         <td>${idx+1}</td>
@@ -458,7 +474,7 @@
                     </tr>
                 `;
             }).join('');
-            document.getElementById('totalInvoices').innerText = `${LANG[currentLang].totalInvoices} ${total.toFixed(2)} ريال`;
+            document.getElementById('totalInvoices').innerHTML = `${LANG[currentLang].totalInvoices} ${total.toFixed(2)} ريال`;
         }
 
         function renderBalances() {
@@ -466,7 +482,7 @@
             document.getElementById('balFaransi').value = data.balances.faransi || 0;
             document.getElementById('balInma').value = data.balances.inma || 0;
             const sum = (data.balances.ahli || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
-            document.getElementById('totalBalance').innerText = `${LANG[currentLang].totalBalance} ${sum.toFixed(2)} ريال`;
+            document.getElementById('totalBalance').innerHTML = `${LANG[currentLang].totalBalance} ${sum.toFixed(2)} ريال`;
         }
 
         function updateSupplierDropdowns() {
@@ -495,6 +511,8 @@
             renderBalances();
             updateSupplierDropdowns();
             updateLiveDate();
+            // تحديث النصوص الثابتة
+            document.getElementById('invoiceHint').innerText = LANG[currentLang].invoiceHint;
             saveToCloud();
         }
 
@@ -644,8 +662,8 @@
                 tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
             } else {
                 tbody.innerHTML = filtered.map((inv, idx) => {
-                    const dateAdded = currentLang === 'ar' ? formatDate(inv.date) : formatDateEn(inv.date);
-                    const datePaid = inv.payDate ? (currentLang === 'ar' ? formatDate(inv.payDate) : formatDateEn(inv.payDate)) : '-';
+                    const dateAdded = formatDate(inv.date, currentLang);
+                    const datePaid = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
                     return `
                         <tr>
                             <td>${idx+1}</td>
@@ -725,6 +743,8 @@
         function applyLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
+            
+            // تحديث جميع النصوص
             document.getElementById('brandSub').innerText = t.brandSub;
             document.getElementById('tab1').innerText = t.tab1;
             document.getElementById('tab2').innerText = t.tab2;
@@ -769,7 +789,9 @@
             document.getElementById('repDatePaid').innerText = t.repDatePaid;
             document.getElementById('repStatus').innerText = t.repStatus;
             document.getElementById('repBank').innerText = t.repBank;
+            document.getElementById('invoiceHint').innerText = t.invoiceHint;
 
+            // إعادة ربط الأحداث
             document.getElementById('balAhli').addEventListener('input', function() {
                 data.balances.ahli = parseFloat(this.value) || 0;
                 refreshAll();
@@ -782,6 +804,7 @@
                 data.balances.inma = parseFloat(this.value) || 0;
                 refreshAll();
             });
+            
             updateSupplierDropdowns();
             updateLiveDate();
             refreshAll();
@@ -860,17 +883,16 @@
                                 if (!inv.payDate) inv.payDate = '';
                             });
                             refreshAll();
-                            setSyncStatus('🔄 Updated from another device', 'saved');
+                            setSyncStatus(LANG[currentLang].syncUpdated, 'saved');
                         }
                     }
                 }
             });
             setTimeout(generateReport, 500);
-            // تحديث التاريخ كل دقيقة
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع التاريخ الحي والترجمة الكاملة');
+        console.log('✅ النظام جاهز مع الترجمة الكاملة والتاريخ الحي');
     </script>
 </body>
 </html>
