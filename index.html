@@ -38,7 +38,7 @@
         .card { background: #161b22; border-radius: 16px; padding: 22px; margin-bottom: 20px; border: 1px solid #30363d; }
         .card h2 { margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px; color: #58a6ff; font-size: 22px; }
         .flex-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 12px 0; }
-        .flex-row input, .flex-row select { padding: 10px 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; flex: 1 1 160px; min-width: 140px; }
+        .flex-row input { padding: 10px 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; flex: 1 1 160px; min-width: 140px; }
         .flex-row button { padding: 10px 20px; border-radius: 8px; border: none; background: #1f6feb; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .flex-row button:hover { background: #388bfd; }
         .flex-row button.danger { background: #da3633; }
@@ -58,27 +58,20 @@
     </style>
 </head>
 <body>
-
     <div class="lang-toggle" id="langToggle">🇸🇦 العربية / English</div>
     <div class="sync-status" id="syncStatus">🔄 جارٍ المزامنة...</div>
-
     <div class="container">
-
-        <!-- الهوية -->
         <div class="brand-header">
             <div class="brand-ar">مؤسسة آفاق التبريد التجارية</div>
             <div class="brand-en">World Cooling Trade</div>
             <div class="brand-sub" id="brandSub">⏣ نظام إدارة الموردين والفواتير - سحابي</div>
         </div>
-
-        <!-- شريط التنقل -->
-        <div class="tabs" id="tabBar">
+        <div class="tabs">
             <button class="tab-btn active" data-page="page1" id="tab1">🗂️ الموردين</button>
             <button class="tab-btn" data-page="page2" id="tab2">🏦 الأرصدة</button>
             <button class="tab-btn" data-page="page3" id="tab3">📄 الفواتير</button>
         </div>
 
-        <!-- الصفحات -->
         <div class="page active" id="page1">
             <div class="card">
                 <h2 id="titleSuppliers">🗂️ إدارة الموردين</h2>
@@ -122,41 +115,29 @@
                 <div class="total-box" id="totalInvoices">إجمالي المدفوعات: 0.00 ريال</div>
             </div>
         </div>
-
     </div>
 
     <script>
         // ============================================================
-        //  1. إعداد Firebase ⚠️ استبدل القيم التالية ببيانات مشروعك
+        //  بيانات Firebase الصحيحة (تم تعديلها)
         // ============================================================
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",                // ⬅️ استبدل
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // ⬅️ استبدل
-            projectId: "YOUR_PROJECT_ID",          // ⬅️ استبدل
-            storageBucket: "YOUR_PROJECT_ID.appspot.com", // ⬅️ استبدل
-            messagingSenderId: "YOUR_SENDER_ID",   // ⬅️ استبدل
-            appId: "YOUR_APP_ID"                   // ⬅️ استبدل
+            apiKey: "AIzaSyAcQUA7XHudSDku_hQCBbOjbrjzPnJTt3A",
+            authDomain: "world-cooling.firebaseapp.com",
+            projectId: "world-cooling",
+            storageBucket: "world-cooling.firebasestorage.app",
+            messagingSenderId: "33761426937",
+            appId: "1:33761426937:web:a0b87ef02d60b8d86c1128"
         };
 
-        // تهيئة Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ============================================================
-        //  2. البيانات المحلية
-        // ============================================================
-        let data = {
-            suppliers: [],
-            balances: { ahli: 0, faransi: 0, inma: 0 },
-            invoices: []
-        };
-
+        let data = { suppliers: [], balances: { ahli: 0, faransi: 0, inma: 0 }, invoices: [] };
         let isSaving = false;
         let lastSavedData = '';
 
-        // ============================================================
-        //  3. الترجمة
-        // ============================================================
+        // الترجمة
         const LANG = {
             ar: {
                 brandSub: '⏣ نظام إدارة الموردين والفواتير - سحابي',
@@ -193,9 +174,6 @@
         };
         let currentLang = 'ar';
 
-        // ============================================================
-        //  4. المزامنة مع Firebase
-        // ============================================================
         function setSyncStatus(text, type = 'loading') {
             const el = document.getElementById('syncStatus');
             el.innerText = text;
@@ -204,7 +182,6 @@
             if (type === 'error') el.classList.add('error');
         }
 
-        // تحميل البيانات من السحابة
         async function loadFromCloud() {
             try {
                 setSyncStatus('🔄 جارٍ التحميل...', 'loading');
@@ -217,26 +194,21 @@
                         if (!data.invoices) data.invoices = [];
                         refreshAll();
                         setSyncStatus('✅ تم التحميل من السحابة', 'saved');
-                        console.log('✅ تم تحميل البيانات من Firebase');
                         return;
                     }
                 }
-                // إذا لم توجد بيانات في السحابة، استخدم البيانات المحلية أو الفارغة
                 setSyncStatus('📡 لا توجد بيانات سحابية، نبدأ من جديد', 'saved');
                 refreshAll();
             } catch (error) {
-                console.error('❌ خطأ في التحميل:', error);
+                console.error(error);
                 setSyncStatus('❌ خطأ في الاتصال بالسحابة', 'error');
                 refreshAll();
             }
         }
 
-        // حفظ البيانات إلى السحابة
         async function saveToCloud() {
             const currentDataStr = JSON.stringify(data);
-            if (currentDataStr === lastSavedData && lastSavedData !== '') {
-                return;
-            }
+            if (currentDataStr === lastSavedData && lastSavedData !== '') return;
             if (isSaving) return;
             isSaving = true;
             try {
@@ -244,18 +216,14 @@
                 await db.collection('appData').doc('mainData').set(data);
                 lastSavedData = currentDataStr;
                 setSyncStatus('✅ تم الحفظ في السحابة', 'saved');
-                console.log('✅ تم حفظ البيانات في Firebase');
             } catch (error) {
-                console.error('❌ خطأ في الحفظ:', error);
+                console.error(error);
                 setSyncStatus('❌ فشل الحفظ - تحقق من الإنترنت', 'error');
             } finally {
                 isSaving = false;
             }
         }
 
-        // ============================================================
-        //  5. دوال العرض والتعديل
-        // ============================================================
         function renderSuppliers() {
             const tbody = document.getElementById('supplierBody');
             if (data.suppliers.length === 0) {
@@ -316,9 +284,6 @@
             saveToCloud();
         }
 
-        // ============================================================
-        //  6. العمليات
-        // ============================================================
         function addSupplier() {
             const name = document.getElementById('supplierName').value.trim();
             const bank = document.getElementById('supplierBank').value.trim();
@@ -379,7 +344,6 @@
             }
         }
 
-        // الأرصدة
         document.getElementById('balAhli').addEventListener('input', function() {
             data.balances.ahli = parseFloat(this.value) || 0;
             refreshAll();
@@ -393,9 +357,6 @@
             refreshAll();
         });
 
-        // ============================================================
-        //  7. تبديل اللغة
-        // ============================================================
         function applyLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
@@ -423,7 +384,6 @@
             document.getElementById('supplierIban').placeholder = t.placeholderSupplierIban;
             document.getElementById('invoiceCompany').placeholder = t.placeholderInvoiceCompany;
             document.getElementById('invoiceAmount').placeholder = t.placeholderInvoiceAmount;
-            // إعادة ربط الأحداث
             document.getElementById('balAhli').addEventListener('input', function() {
                 data.balances.ahli = parseFloat(this.value) || 0;
                 refreshAll();
@@ -447,9 +407,6 @@
             applyLanguage(newLang);
         });
 
-        // ============================================================
-        //  8. التنقل بين الصفحات
-        // ============================================================
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -459,9 +416,6 @@
             });
         });
 
-        // ============================================================
-        //  9. ربط الأزرار
-        // ============================================================
         document.getElementById('addSupplierBtn').addEventListener('click', addSupplier);
         document.getElementById('addInvoiceBtn').addEventListener('click', addInvoice);
 
@@ -475,13 +429,9 @@
             }
         });
 
-        // ============================================================
-        //  10. التهيئة - تحميل من السحابة
-        // ============================================================
         (async function init() {
             await loadFromCloud();
             applyLanguage('ar');
-            // استماع للتحديثات اللحظية من الأجهزة الأخرى
             db.collection('appData').doc('mainData').onSnapshot((doc) => {
                 if (doc.exists) {
                     const cloudData = doc.data();
@@ -493,14 +443,13 @@
                             if (!data.invoices) data.invoices = [];
                             refreshAll();
                             setSyncStatus('🔄 تم التحديث من جهاز آخر', 'saved');
-                            console.log('🔄 تحديث لحظي من السحابة');
                         }
                     }
                 }
             });
         })();
 
-        console.log('✅ مؤسسة آفاق التبريد التجارية - السحابة جاهزة 2026');
+        console.log('✅ النظام جاهز');
     </script>
 </body>
 </html>
