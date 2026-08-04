@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مؤسسة آفاق التبريد التجارية - نظام التقارير</title>
+    <title>مؤسسة آفاق التبريد التجارية - World Cooling Trade</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
@@ -15,6 +15,7 @@
         .brand-ar { font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 2px; text-shadow: 0 0 20px #1f6feb99; }
         .brand-en { font-size: 22px; font-weight: 300; color: #8ab4f8; letter-spacing: 4px; margin-top: 6px; text-transform: uppercase; }
         .brand-sub { font-size: 14px; color: #8b949e; margin-top: 10px; border-top: 1px solid #1f6feb44; padding-top: 10px; display: inline-block; padding-left: 20px; padding-right: 20px; }
+        .live-date { font-size: 16px; color: #f0883e; margin-top: 8px; font-weight: bold; }
         .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
         .tab-btn { background: #21262d; border: none; color: #8b949e; padding: 12px 28px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .tab-btn.active { background: #1f6feb; color: white; box-shadow: 0 0 20px #1f6feb66; }
@@ -52,7 +53,6 @@
         .report-summary .stat .label { font-size: 14px; color: #8b949e; }
         .filter-row { background: #0d1117; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #30363d; }
         .filter-row .flex-row { margin: 0; }
-        .pointer { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -63,6 +63,7 @@
             <div class="brand-ar">مؤسسة آفاق التبريد التجارية</div>
             <div class="brand-en">World Cooling Trade</div>
             <div class="brand-sub" id="brandSub">⏣ نظام إدارة الموردين والفواتير - سحابي</div>
+            <div class="live-date" id="liveDate">📅 اليوم: --/--/----</div>
         </div>
         <div class="tabs">
             <button class="tab-btn active" data-page="page1" id="tab1">🗂️ الموردين</button>
@@ -128,11 +129,10 @@
             <div class="card">
                 <h2 id="titleReports">📊 التقارير المالية</h2>
                 
-                <!-- فلتر البحث -->
                 <div class="filter-row">
                     <div class="flex-row">
-                        <label>📅 من تاريخ: <input type="date" id="reportDateFrom" /></label>
-                        <label>📅 إلى تاريخ: <input type="date" id="reportDateTo" /></label>
+                        <label id="lblDateFrom">📅 من تاريخ: <input type="date" id="reportDateFrom" /></label>
+                        <label id="lblDateTo">📅 إلى تاريخ: <input type="date" id="reportDateTo" /></label>
                         <select id="reportSupplierFilter" style="flex:1.5;min-width:180px;">
                             <option value="">-- جميع الموردين --</option>
                         </select>
@@ -141,17 +141,15 @@
                     </div>
                 </div>
 
-                <!-- إحصائيات سريعة -->
                 <div class="report-summary" id="reportSummary">
-                    <div class="stat"><div class="num" id="statCount">0</div><div class="label">عدد الفواتير</div></div>
-                    <div class="stat"><div class="num" id="statTotal">0.00</div><div class="label">إجمالي المبلغ</div></div>
-                    <div class="stat"><div class="num" id="statPaid">0.00</div><div class="label">المدفوع</div></div>
-                    <div class="stat"><div class="num" id="statUnpaid">0.00</div><div class="label">غير المدفوع</div></div>
+                    <div class="stat"><div class="num" id="statCount">0</div><div class="label" id="statCountLabel">عدد الفواتير</div></div>
+                    <div class="stat"><div class="num" id="statTotal">0.00</div><div class="label" id="statTotalLabel">إجمالي المبلغ</div></div>
+                    <div class="stat"><div class="num" id="statPaid">0.00</div><div class="label" id="statPaidLabel">المدفوع</div></div>
+                    <div class="stat"><div class="num" id="statUnpaid">0.00</div><div class="label" id="statUnpaidLabel">غير المدفوع</div></div>
                 </div>
 
-                <!-- جدول التقارير -->
                 <table>
-                    <thead><tr><th>#</th><th>الشركة</th><th>المبلغ</th><th>تاريخ الإضافة</th><th>تاريخ الدفع</th><th>الحالة</th><th>بنك الدفع</th></tr></thead>
+                    <thead><tr><th>#</th><th id="repCompany">الشركة</th><th id="repAmount">المبلغ</th><th id="repDateAdded">تاريخ الإضافة</th><th id="repDatePaid">تاريخ الدفع</th><th id="repStatus">الحالة</th><th id="repBank">بنك الدفع</th></tr></thead>
                     <tbody id="reportBody"></tbody>
                 </table>
                 <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -163,7 +161,7 @@
 
     <script>
         // ============================================================
-        //  🔥 بيانات Firebase (استبدلها ببياناتك)
+        //  🔥 Firebase Config (استبدلها ببياناتك)
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAcQUA7XHudSDku_hQCB0bjrzPnJTt3A",
@@ -183,14 +181,42 @@
         let data = {
             suppliers: [],
             balances: { ahli: 0, faransi: 0, inma: 0 },
-            invoices: []  // { id, company, amount, date, paid, payBank, payDate }
+            invoices: []
         };
 
         let isSaving = false;
         let lastSavedData = '';
 
         // ============================================================
-        //  الترجمة
+        //  دوال التاريخ
+        // ============================================================
+        function getToday() {
+            return new Date().toISOString().slice(0,10);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('ar-EG');
+        }
+
+        function formatDateEn(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('en-US');
+        }
+
+        function updateLiveDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const arDate = now.toLocaleDateString('ar-EG', options);
+            const enDate = now.toLocaleDateString('en-US', options);
+            document.getElementById('liveDate').innerHTML = 
+                currentLang === 'ar' ? `📅 اليوم: ${arDate}` : `📅 Today: ${enDate}`;
+        }
+
+        // ============================================================
+        //  الترجمة (كاملة بالعربي والإنجليزي)
         // ============================================================
         const LANG = {
             ar: {
@@ -242,7 +268,16 @@
                 statTotal: 'إجمالي المبلغ',
                 statPaid: 'المدفوع',
                 statUnpaid: 'غير المدفوع',
-                exportBtn: '📥 تصدير التقرير (CSV)'
+                exportBtn: '📥 تصدير التقرير (CSV)',
+                lblDateFrom: '📅 من تاريخ:',
+                lblDateTo: '📅 إلى تاريخ:',
+                repCompany: 'الشركة',
+                repAmount: 'المبلغ',
+                repDateAdded: 'تاريخ الإضافة',
+                repDatePaid: 'تاريخ الدفع',
+                repStatus: 'الحالة',
+                repBank: 'بنك الدفع',
+                allSuppliers: '-- جميع الموردين --'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -293,7 +328,16 @@
                 statTotal: 'Total Amount',
                 statPaid: 'Paid',
                 statUnpaid: 'Unpaid',
-                exportBtn: '📥 Export Report (CSV)'
+                exportBtn: '📥 Export Report (CSV)',
+                lblDateFrom: '📅 From Date:',
+                lblDateTo: '📅 To Date:',
+                repCompany: 'Company',
+                repAmount: 'Amount',
+                repDateAdded: 'Added Date',
+                repDatePaid: 'Payment Date',
+                repStatus: 'Status',
+                repBank: 'Payment Bank',
+                allSuppliers: '-- All Suppliers --'
             }
         };
         let currentLang = 'ar';
@@ -311,7 +355,7 @@
 
         async function loadFromCloud() {
             try {
-                setSyncStatus('🔄 جارٍ التحميل...', 'loading');
+                setSyncStatus('🔄 Loading...', 'loading');
                 const doc = await db.collection('appData').doc('mainData').get();
                 if (doc.exists) {
                     const cloudData = doc.data();
@@ -319,23 +363,22 @@
                         data = cloudData;
                         if (!data.balances) data.balances = { ahli: 0, faransi: 0, inma: 0 };
                         if (!data.invoices) data.invoices = [];
-                        // تأكد من وجود الحقول الجديدة في كل فاتورة
                         data.invoices.forEach(inv => {
-                            if (!inv.date) inv.date = new Date().toISOString().slice(0,10);
+                            if (!inv.date) inv.date = getToday();
                             if (inv.paid === undefined) inv.paid = false;
                             if (!inv.payBank) inv.payBank = '';
                             if (!inv.payDate) inv.payDate = '';
                         });
                         refreshAll();
-                        setSyncStatus('✅ تم التحميل من السحابة', 'saved');
+                        setSyncStatus('✅ Loaded from cloud', 'saved');
                         return;
                     }
                 }
-                setSyncStatus('📡 لا توجد بيانات سحابية، نبدأ من جديد', 'saved');
+                setSyncStatus('📡 No cloud data, starting fresh', 'saved');
                 refreshAll();
             } catch (error) {
                 console.error(error);
-                setSyncStatus('❌ خطأ في الاتصال بالسحابة', 'error');
+                setSyncStatus('❌ Cloud connection error', 'error');
                 refreshAll();
             }
         }
@@ -346,29 +389,16 @@
             if (isSaving) return;
             isSaving = true;
             try {
-                setSyncStatus('⏳ جارٍ الحفظ...', 'loading');
+                setSyncStatus('⏳ Saving...', 'loading');
                 await db.collection('appData').doc('mainData').set(data);
                 lastSavedData = currentDataStr;
-                setSyncStatus('✅ تم الحفظ في السحابة', 'saved');
+                setSyncStatus('✅ Saved to cloud', 'saved');
             } catch (error) {
                 console.error(error);
-                setSyncStatus('❌ فشل الحفظ', 'error');
+                setSyncStatus('❌ Save failed', 'error');
             } finally {
                 isSaving = false;
             }
-        }
-
-        // ============================================================
-        //  دوال مساعدة
-        // ============================================================
-        function getToday() {
-            return new Date().toISOString().slice(0,10);
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('ar-EG');
         }
 
         // ============================================================
@@ -410,13 +440,14 @@
                     `<span class="badge-paid">${LANG[currentLang].paid}</span>` : 
                     `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
                 const payBank = inv.payBank || '-';
-                const payDate = inv.payDate ? formatDate(inv.payDate) : '-';
+                const dateDisplay = currentLang === 'ar' ? formatDate(inv.date) : formatDateEn(inv.date);
+                const payDateDisplay = inv.payDate ? (currentLang === 'ar' ? formatDate(inv.payDate) : formatDateEn(inv.payDate)) : '-';
                 return `
                     <tr>
                         <td>${idx+1}</td>
                         <td><input type="text" value="${inv.company}" data-id="${inv.id}" class="edit-inv-company" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                         <td><input type="number" value="${inv.amount}" data-id="${inv.id}" class="edit-inv-amount" step="0.01" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
-                        <td>${formatDate(inv.date)}</td>
+                        <td>${dateDisplay}</td>
                         <td>${status}</td>
                         <td>${payBank}</td>
                         <td class="actions">
@@ -439,7 +470,6 @@
         }
 
         function updateSupplierDropdowns() {
-            // للفواتير
             const select = document.getElementById('invoiceSupplierSelect');
             const currentVal = select.value;
             select.innerHTML = `<option value="">${LANG[currentLang].selectDefault}</option>`;
@@ -449,10 +479,9 @@
             });
             if (currentVal) select.value = currentVal;
 
-            // للتقارير
             const reportSelect = document.getElementById('reportSupplierFilter');
             const repVal = reportSelect.value;
-            reportSelect.innerHTML = `<option value="">-- جميع الموردين --</option>`;
+            reportSelect.innerHTML = `<option value="">${LANG[currentLang].allSuppliers}</option>`;
             data.suppliers.forEach(s => {
                 const label = s.nameAr + (s.nameEn ? ` (${s.nameEn})` : '');
                 reportSelect.innerHTML += `<option value="${s.nameAr}">${label}</option>`;
@@ -465,6 +494,7 @@
             renderInvoices();
             renderBalances();
             updateSupplierDropdowns();
+            updateLiveDate();
             saveToCloud();
         }
 
@@ -565,26 +595,28 @@
             if (!invoice) return;
             if (!confirm(LANG[currentLang].confirmPay)) return;
 
-            // نافذة اختيار البنك
-            const bankOptions = ['الأهلي', 'الفرنسي', 'الإنماء'];
-            const bankChoice = prompt('اختر البنك الذي دُفع منه:\n1. الأهلي\n2. الفرنسي\n3. الإنماء', '1');
+            const bankOptions = currentLang === 'ar' ? ['الأهلي', 'الفرنسي', 'الإنماء'] : ['AlAhli', 'French', 'AlInma'];
+            const promptMsg = currentLang === 'ar' ? 
+                'اختر البنك الذي دُفع منه:\n1. الأهلي\n2. الفرنسي\n3. الإنماء' :
+                'Select bank:\n1. AlAhli\n2. French\n3. AlInma';
+            const bankChoice = prompt(promptMsg, '1');
             let selectedBank = '';
-            if (bankChoice === '1') selectedBank = 'الأهلي';
-            else if (bankChoice === '2') selectedBank = 'الفرنسي';
-            else if (bankChoice === '3') selectedBank = 'الإنماء';
-            else { alert('تم إلغاء الدفع'); return; }
+            if (bankChoice === '1') selectedBank = bankOptions[0];
+            else if (bankChoice === '2') selectedBank = bankOptions[1];
+            else if (bankChoice === '3') selectedBank = bankOptions[2];
+            else { alert(currentLang === 'ar' ? 'تم إلغاء الدفع' : 'Payment cancelled'); return; }
 
             invoice.paid = true;
             invoice.payBank = selectedBank;
             invoice.payDate = getToday();
 
-            // تحديث الرصيد
-            if (selectedBank === 'الأهلي') data.balances.ahli = (data.balances.ahli || 0) - invoice.amount;
-            else if (selectedBank === 'الفرنسي') data.balances.faransi = (data.balances.faransi || 0) - invoice.amount;
-            else if (selectedBank === 'الإنماء') data.balances.inma = (data.balances.inma || 0) - invoice.amount;
+            if (selectedBank === 'الأهلي' || selectedBank === 'AlAhli') data.balances.ahli = (data.balances.ahli || 0) - invoice.amount;
+            else if (selectedBank === 'الفرنسي' || selectedBank === 'French') data.balances.faransi = (data.balances.faransi || 0) - invoice.amount;
+            else if (selectedBank === 'الإنماء' || selectedBank === 'AlInma') data.balances.inma = (data.balances.inma || 0) - invoice.amount;
 
             refreshAll();
-            alert(`✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}`);
+            const msg = currentLang === 'ar' ? `✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}` : `✅ Invoice paid from ${selectedBank}`;
+            alert(msg);
         }
 
         // ============================================================
@@ -597,38 +629,37 @@
 
             let filtered = data.invoices.filter(inv => inv.paid === true);
 
-            // فلترة بالتاريخ
             if (dateFrom) {
                 filtered = filtered.filter(inv => inv.payDate && inv.payDate >= dateFrom);
             }
             if (dateTo) {
                 filtered = filtered.filter(inv => inv.payDate && inv.payDate <= dateTo);
             }
-
-            // فلترة بالمورد
             if (supplierFilter) {
                 filtered = filtered.filter(inv => inv.company === supplierFilter);
             }
 
-            // عرض النتائج
             const tbody = document.getElementById('reportBody');
             if (filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
             } else {
-                tbody.innerHTML = filtered.map((inv, idx) => `
-                    <tr>
-                        <td>${idx+1}</td>
-                        <td>${inv.company}</td>
-                        <td>${inv.amount.toFixed(2)}</td>
-                        <td>${formatDate(inv.date)}</td>
-                        <td>${inv.payDate ? formatDate(inv.payDate) : '-'}</td>
-                        <td><span class="badge-paid">${LANG[currentLang].paid}</span></td>
-                        <td>${inv.payBank || '-'}</td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = filtered.map((inv, idx) => {
+                    const dateAdded = currentLang === 'ar' ? formatDate(inv.date) : formatDateEn(inv.date);
+                    const datePaid = inv.payDate ? (currentLang === 'ar' ? formatDate(inv.payDate) : formatDateEn(inv.payDate)) : '-';
+                    return `
+                        <tr>
+                            <td>${idx+1}</td>
+                            <td>${inv.company}</td>
+                            <td>${inv.amount.toFixed(2)}</td>
+                            <td>${dateAdded}</td>
+                            <td>${datePaid}</td>
+                            <td><span class="badge-paid">${LANG[currentLang].paid}</span></td>
+                            <td>${inv.payBank || '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
-            // الإحصائيات
             const total = filtered.reduce((sum, inv) => sum + inv.amount, 0);
             document.getElementById('statCount').innerText = filtered.length;
             document.getElementById('statTotal').innerText = total.toFixed(2);
@@ -636,16 +667,16 @@
             document.getElementById('statUnpaid').innerText = '0.00';
         }
 
-        // ============================================================
-        //  تصدير التقرير (CSV)
-        // ============================================================
         function exportReportCSV() {
             const rows = document.querySelectorAll('#reportBody tr');
             if (rows.length === 0 || rows[0].classList.contains('empty-msg')) {
-                alert('لا توجد بيانات لتصديرها');
+                alert(currentLang === 'ar' ? 'لا توجد بيانات لتصديرها' : 'No data to export');
                 return;
             }
-            let csv = 'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع\n';
+            const headers = currentLang === 'ar' ? 
+                'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع' :
+                'Company,Amount,Added Date,Payment Date,Bank';
+            let csv = headers + '\n';
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
                 if (cols.length >= 7) {
@@ -655,12 +686,13 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `تقرير_المدفوعات_${getToday()}.csv`;
+            const fileName = currentLang === 'ar' ? `تقرير_المدفوعات_${getToday()}.csv` : `Payment_Report_${getToday()}.csv`;
+            link.download = fileName;
             link.click();
         }
 
         // ============================================================
-        //  الأرصدة (تحديث مباشر)
+        //  الأرصدة
         // ============================================================
         document.getElementById('balAhli').addEventListener('input', function() {
             data.balances.ahli = parseFloat(this.value) || 0;
@@ -688,7 +720,7 @@
         document.getElementById('exportReportBtn').addEventListener('click', exportReportCSV);
 
         // ============================================================
-        //  اللغة
+        //  اللغة (ترجمة كاملة)
         // ============================================================
         function applyLanguage(lang) {
             currentLang = lang;
@@ -725,8 +757,19 @@
             document.getElementById('supplierIban').placeholder = t.placeholderIban;
             document.getElementById('invoiceCompanyNew').placeholder = t.placeholderCompanyNew;
             document.getElementById('invoiceAmount').placeholder = t.placeholderAmount;
+            document.getElementById('lblDateFrom').innerHTML = `${t.lblDateFrom} <input type="date" id="reportDateFrom" />`;
+            document.getElementById('lblDateTo').innerHTML = `${t.lblDateTo} <input type="date" id="reportDateTo" />`;
+            document.getElementById('statCountLabel').innerText = t.statCount;
+            document.getElementById('statTotalLabel').innerText = t.statTotal;
+            document.getElementById('statPaidLabel').innerText = t.statPaid;
+            document.getElementById('statUnpaidLabel').innerText = t.statUnpaid;
+            document.getElementById('repCompany').innerText = t.repCompany;
+            document.getElementById('repAmount').innerText = t.repAmount;
+            document.getElementById('repDateAdded').innerText = t.repDateAdded;
+            document.getElementById('repDatePaid').innerText = t.repDatePaid;
+            document.getElementById('repStatus').innerText = t.repStatus;
+            document.getElementById('repBank').innerText = t.repBank;
 
-            // إعادة ربط الأحداث
             document.getElementById('balAhli').addEventListener('input', function() {
                 data.balances.ahli = parseFloat(this.value) || 0;
                 refreshAll();
@@ -740,7 +783,9 @@
                 refreshAll();
             });
             updateSupplierDropdowns();
+            updateLiveDate();
             refreshAll();
+            setTimeout(generateReport, 300);
         }
 
         document.getElementById('langToggle').addEventListener('click', function() {
@@ -781,7 +826,6 @@
             }
         });
 
-        // اختيار مورد من القائمة يملأ الحقل الجديد
         document.getElementById('invoiceSupplierSelect').addEventListener('change', function() {
             if (this.value) {
                 document.getElementById('invoiceCompanyNew').value = this.value;
@@ -794,7 +838,6 @@
         (async function init() {
             await loadFromCloud();
             applyLanguage('ar');
-            // تعيين التاريخ الافتراضي في التقارير (آخر 30 يوم)
             const today = getToday();
             const lastMonth = new Date();
             lastMonth.setDate(lastMonth.getDate() - 30);
@@ -811,22 +854,23 @@
                             if (!data.balances) data.balances = { ahli: 0, faransi: 0, inma: 0 };
                             if (!data.invoices) data.invoices = [];
                             data.invoices.forEach(inv => {
-                                if (!inv.date) inv.date = new Date().toISOString().slice(0,10);
+                                if (!inv.date) inv.date = getToday();
                                 if (inv.paid === undefined) inv.paid = false;
                                 if (!inv.payBank) inv.payBank = '';
                                 if (!inv.payDate) inv.payDate = '';
                             });
                             refreshAll();
-                            setSyncStatus('🔄 تم التحديث من جهاز آخر', 'saved');
+                            setSyncStatus('🔄 Updated from another device', 'saved');
                         }
                     }
                 }
             });
-            // توليد التقرير تلقائياً بعد التحميل
             setTimeout(generateReport, 500);
+            // تحديث التاريخ كل دقيقة
+            setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع التقارير المتقدمة');
+        console.log('✅ النظام جاهز مع التاريخ الحي والترجمة الكاملة');
     </script>
 </body>
 </html>
