@@ -634,6 +634,20 @@
             });
             document.getElementById('invoiceCompanyNew').value = '';
             document.getElementById('invoiceAmount').value = '';
+            
+            // ============================================================
+            //  🚀 إرسال إشعار إلى تيليجرام عبر Google Apps Script
+            // ============================================================
+            fetch("https://script.google.com/macros/s/AKfycbyInpQ96mm09Ge5NGlWpdDRYqD-WyhwBaCsoeHLirFPHrDiDf2poqShp1X9UP4iVWpM1g/exec", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    company: company,
+                    amount: amount,
+                    date: new Date().toISOString().slice(0, 10)
+                })
+            }).catch(err => console.log('خطأ في الإشعار:', err));
+            
             refreshAll();
         }
 
