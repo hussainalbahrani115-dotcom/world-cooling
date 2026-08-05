@@ -75,6 +75,9 @@
         .pricing-table-wrap table { min-width: 600px; }
         .pricing-table-wrap input[type="number"] { width: 100%; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 6px; text-align: center; }
         .best-price { font-weight: bold; color: #f0883e; }
+        .delete-btn { background: #da3633; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
+        .delete-btn:hover { background: #f85149; }
+        .inline-flex { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -203,6 +206,17 @@
                     <button id="tempPricingBtn" class="warning">🔄 مقارنة فقط</button>
                     <button id="viewArchiveBtn">📋 عرض الأرشيف</button>
                 </div>
+                <!-- قوائم المنتجات والشركات مع أزرار الحذف -->
+                <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:15px;padding:10px;background:#0d1117;border-radius:12px;border:1px solid #30363d;">
+                    <div>
+                        <strong id="productsListLabel">📦 المنتجات:</strong>
+                        <div id="productsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div>
+                    </div>
+                    <div>
+                        <strong id="companiesListLabel">🏢 الشركات:</strong>
+                        <div id="companiesList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div>
+                    </div>
+                </div>
                 <div class="pricing-table-wrap">
                     <table id="pricingTable">
                         <thead id="pricingHead">
@@ -305,7 +319,7 @@
         }
 
         // ============================================================
-        //  الترجمة الكاملة (مع إضافة نصوص التسعيرات)
+        //  الترجمة
         // ============================================================
         const LANG = {
             ar: {
@@ -392,22 +406,14 @@
                 lblAhliMubarraz: '🇸🇦 الأهلي (المبرز)',
                 lblFaransi: '🇫🇷 الفرنسي',
                 lblInma: '🇸🇦 الإنماء',
-                // نصوص نظام التسعيرات
-                addProduct: '➕ إضافة منتج',
-                addCompany: '➕ إضافة شركة',
-                savePricing: '💾 حفظ التسعيرة',
-                tempCompare: '🔄 مقارنة فقط',
-                viewArchive: '📋 عرض الأرشيف',
-                pricingNamePrompt: 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):',
-                pricingNameRequired: 'الرجاء إدخال اسم للتسعيرة',
-                pricingSaved: 'تم حفظ التسعيرة في الأرشيف بنجاح',
-                pricingSaveFailed: 'فشل حفظ التسعيرة',
-                noPricesToSave: 'لا توجد أسعار لحفظها',
-                noArchive: 'لا توجد تسعيرات محفوظة في الأرشيف',
-                noPricesToCompare: 'لا توجد أسعار للمقارنة. أدخل بعض الأسعار أولاً.',
-                compareUpdated: 'تم التحديث. يمكنك رؤية أقل سعر لكل منتج في الجدول.',
-                archiveTitle: '📋 أرشيف التسعيرات:\n\n',
-                unnamed: 'بدون اسم'
+                productsListLabel: '📦 المنتجات:',
+                companiesListLabel: '🏢 الشركات:',
+                deleteProduct: 'حذف المنتج',
+                deleteCompany: 'حذف الشركة',
+                confirmDeleteProduct: 'هل أنت متأكد من حذف هذا المنتج؟',
+                confirmDeleteCompany: 'هل أنت متأكد من حذف هذه الشركة؟',
+                productDeleted: 'تم حذف المنتج بنجاح',
+                companyDeleted: 'تم حذف الشركة بنجاح'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -493,22 +499,14 @@
                 lblAhliMubarraz: '🇸🇦 AlAhli (Mubarraz)',
                 lblFaransi: '🇫🇷 French Bank',
                 lblInma: '🇸🇦 AlInma',
-                // نصوص نظام التسعيرات
-                addProduct: '➕ Add Product',
-                addCompany: '➕ Add Company',
-                savePricing: '💾 Save Pricing',
-                tempCompare: '🔄 Compare Only',
-                viewArchive: '📋 View Archive',
-                pricingNamePrompt: 'Enter pricing name (e.g., Copper Pricing - August 2026):',
-                pricingNameRequired: 'Please enter a name for the pricing',
-                pricingSaved: 'Pricing saved to archive successfully',
-                pricingSaveFailed: 'Failed to save pricing',
-                noPricesToSave: 'No prices to save',
-                noArchive: 'No pricing records in archive',
-                noPricesToCompare: 'No prices to compare. Enter some prices first.',
-                compareUpdated: 'Updated. You can see the best price for each product in the table.',
-                archiveTitle: '📋 Pricing Archive:\n\n',
-                unnamed: 'Unnamed'
+                productsListLabel: '📦 Products:',
+                companiesListLabel: '🏢 Companies:',
+                deleteProduct: 'Delete Product',
+                deleteCompany: 'Delete Company',
+                confirmDeleteProduct: 'Are you sure you want to delete this product?',
+                confirmDeleteCompany: 'Are you sure you want to delete this company?',
+                productDeleted: 'Product deleted successfully',
+                companyDeleted: 'Company deleted successfully'
             }
         };
 
@@ -699,6 +697,7 @@
             updateLiveDate();
             updateDashboard();
             renderPricingTable();
+            renderProductsAndCompanies();
             document.getElementById('invoiceHint').innerText = LANG[currentLang].invoiceHint;
             document.getElementById('balanceNote').innerText = LANG[currentLang].balanceNote;
             document.getElementById('lblAhliHufuf').innerHTML = LANG[currentLang].lblAhliHufuf;
@@ -879,7 +878,7 @@
         }
 
         // ============================================================
-        //  نظام التسعيرات (Pricing System) - مع دعم اللغة
+        //  نظام التسعيرات (Pricing System)
         // ============================================================
         async function loadPricingData() {
             try {
@@ -893,6 +892,7 @@
                 console.error('خطأ في تحميل بيانات التسعير:', error);
             }
             renderPricingTable();
+            renderProductsAndCompanies();
         }
 
         async function savePricingStructure() {
@@ -901,11 +901,72 @@
                     products: pricing.products,
                     companies: pricing.companies
                 });
-                alert('✅ ' + (currentLang === 'ar' ? 'تم حفظ هيكل التسعيرات بنجاح' : 'Pricing structure saved successfully'));
+                console.log('✅ تم حفظ هيكل التسعيرات');
             } catch (error) {
                 console.error('خطأ في حفظ هيكل التسعيرات:', error);
-                alert('❌ ' + (currentLang === 'ar' ? 'فشل الحفظ' : 'Save failed'));
             }
+        }
+
+        // عرض المنتجات والشركات مع أزرار حذف
+        function renderProductsAndCompanies() {
+            const productsContainer = document.getElementById('productsList');
+            const companiesContainer = document.getElementById('companiesList');
+            
+            // عرض المنتجات
+            if (pricing.products.length === 0) {
+                productsContainer.innerHTML = `<span style="color:#8b949e;">${currentLang === 'ar' ? 'لا توجد منتجات' : 'No products'}</span>`;
+            } else {
+                productsContainer.innerHTML = pricing.products.map(p => `
+                    <span class="inline-flex" style="background:#0d1117;padding:4px 8px;border-radius:12px;border:1px solid #30363d;">
+                        ${p.name}
+                        <button class="delete-btn" onclick="deleteProduct('${p.id}')">✕</button>
+                    </span>
+                `).join('');
+            }
+            
+            // عرض الشركات
+            if (pricing.companies.length === 0) {
+                companiesContainer.innerHTML = `<span style="color:#8b949e;">${currentLang === 'ar' ? 'لا توجد شركات' : 'No companies'}</span>`;
+            } else {
+                companiesContainer.innerHTML = pricing.companies.map(c => `
+                    <span class="inline-flex" style="background:#0d1117;padding:4px 8px;border-radius:12px;border:1px solid #30363d;">
+                        ${c.name}
+                        <button class="delete-btn" onclick="deleteCompany('${c.id}')">✕</button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        // حذف منتج
+        async function deleteProduct(id) {
+            if (!confirm(LANG[currentLang].confirmDeleteProduct)) return;
+            pricing.products = pricing.products.filter(p => p.id !== id);
+            // حذف الأسعار المرتبطة بهذا المنتج
+            Object.keys(pricing.prices).forEach(key => {
+                if (key.startsWith(id + '_')) {
+                    delete pricing.prices[key];
+                }
+            });
+            await savePricingStructure();
+            renderPricingTable();
+            renderProductsAndCompanies();
+            alert(LANG[currentLang].productDeleted);
+        }
+
+        // حذف شركة
+        async function deleteCompany(id) {
+            if (!confirm(LANG[currentLang].confirmDeleteCompany)) return;
+            pricing.companies = pricing.companies.filter(c => c.id !== id);
+            // حذف الأسعار المرتبطة بهذه الشركة
+            Object.keys(pricing.prices).forEach(key => {
+                if (key.endsWith('_' + id)) {
+                    delete pricing.prices[key];
+                }
+            });
+            await savePricingStructure();
+            renderPricingTable();
+            renderProductsAndCompanies();
+            alert(LANG[currentLang].companyDeleted);
         }
 
         function addNewProduct() {
@@ -914,6 +975,7 @@
                 const newProduct = { id: crypto.randomUUID(), name: name.trim() };
                 pricing.products.push(newProduct);
                 renderPricingTable();
+                renderProductsAndCompanies();
                 savePricingStructure();
             }
         }
@@ -924,6 +986,7 @@
                 const newCompany = { id: crypto.randomUUID(), name: name.trim() };
                 pricing.companies.push(newCompany);
                 renderPricingTable();
+                renderProductsAndCompanies();
                 savePricingStructure();
             }
         }
@@ -933,11 +996,11 @@
             const tbody = document.getElementById('pricingBody');
 
             // بناء رأس الجدول
-            let headerRow = '<tr><th>#</th><th>' + LANG[currentLang].thProduct + '</th>';
+            let headerRow = '<tr><th>#</th><th id="thProduct">' + LANG[currentLang].thProduct + '</th>';
             pricing.companies.forEach((company) => {
                 headerRow += `<th>${company.name}</th>`;
             });
-            headerRow += '<th>' + LANG[currentLang].thBestPrice + '</th></tr>';
+            headerRow += '<th id="thBestPrice">' + LANG[currentLang].thBestPrice + '</th></tr>';
             thead.innerHTML = headerRow;
 
             // إذا لم توجد منتجات أو شركات
@@ -989,17 +1052,22 @@
         }
 
         // ============================================================
-        //  حفظ التسعيرة مع اسم وتاريخ (مع دعم اللغة)
+        //  حفظ التسعيرة مع اسم وتاريخ
         // ============================================================
         async function saveCurrentPricing() {
             if (Object.keys(pricing.prices).length === 0) {
-                alert(LANG[currentLang].noPricesToSave);
+                alert(currentLang === 'ar' ? 'لا توجد أسعار لحفظها' : 'No prices to save');
                 return;
             }
 
-            const pricingName = prompt(LANG[currentLang].pricingNamePrompt);
+            // طلب اسم التسعيرة
+            const pricingName = prompt(
+                currentLang === 'ar' 
+                    ? 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):' 
+                    : 'Enter pricing name (e.g., Copper Pricing - August 2026):'
+            );
             if (!pricingName || pricingName.trim() === '') {
-                alert(LANG[currentLang].pricingNameRequired);
+                alert(currentLang === 'ar' ? 'الرجاء إدخال اسم للتسعيرة' : 'Please enter a name for the pricing');
                 return;
             }
 
@@ -1016,32 +1084,32 @@
                     products: pricing.products,
                     companies: pricing.companies
                 });
-                alert('✅ ' + LANG[currentLang].pricingSaved);
+                alert('✅ ' + (currentLang === 'ar' ? 'تم حفظ التسعيرة في الأرشيف بنجاح' : 'Pricing saved to archive successfully'));
             } catch (error) {
                 console.error('خطأ في حفظ التسعيرة:', error);
-                alert('❌ ' + LANG[currentLang].pricingSaveFailed);
+                alert('❌ ' + (currentLang === 'ar' ? 'فشل حفظ التسعيرة' : 'Failed to save pricing'));
             }
         }
 
         // ============================================================
-        //  عرض الأرشيف مع الأسماء والتواريخ (مع دعم اللغة)
+        //  عرض الأرشيف مع الأسماء والتواريخ
         // ============================================================
         async function viewArchive() {
             try {
                 const snapshot = await db.collection('pricingArchive').orderBy('date', 'desc').get();
                 if (snapshot.empty) {
-                    alert(LANG[currentLang].noArchive);
+                    alert(currentLang === 'ar' ? 'لا توجد تسعيرات محفوظة في الأرشيف' : 'No pricing records in archive');
                     return;
                 }
 
-                let message = LANG[currentLang].archiveTitle;
+                let message = (currentLang === 'ar' ? '📋 أرشيف التسعيرات:\n\n' : '📋 Pricing Archive:\n\n');
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const date = new Date(data.date).toLocaleDateString(
                         currentLang === 'ar' ? 'ar-EG' : 'en-US', 
                         { year: 'numeric', month: 'long', day: 'numeric' }
                     );
-                    const name = data.name || LANG[currentLang].unnamed;
+                    const name = data.name || (currentLang === 'ar' ? 'بدون اسم' : 'Unnamed');
                     message += `📌 ${name}\n📅 ${date}\n`;
                     data.prices.forEach(p => {
                         const product = data.products.find(pr => pr.id === p.productId);
@@ -1053,16 +1121,16 @@
                 alert(message);
             } catch (error) {
                 console.error('خطأ في تحميل الأرشيف:', error);
-                alert('❌ ' + LANG[currentLang].pricingSaveFailed);
+                alert('❌ ' + (currentLang === 'ar' ? 'فشل تحميل الأرشيف' : 'Failed to load archive'));
             }
         }
 
         function tempCompare() {
             if (Object.keys(pricing.prices).length === 0) {
-                alert(LANG[currentLang].noPricesToCompare);
+                alert(currentLang === 'ar' ? 'لا توجد أسعار للمقارنة. أدخل بعض الأسعار أولاً.' : 'No prices to compare. Enter some prices first.');
                 return;
             }
-            alert('✅ ' + LANG[currentLang].compareUpdated);
+            alert('✅ ' + (currentLang === 'ar' ? 'تم التحديث. يمكنك رؤية أقل سعر لكل منتج في الجدول.' : 'Updated. You can see the best price for each product in the table.'));
             renderPricingTable();
         }
 
@@ -1170,13 +1238,8 @@
             document.getElementById('lblFaransi').innerHTML = t.lblFaransi;
             document.getElementById('lblInma').innerHTML = t.lblInma;
             document.getElementById('emptyPricingMsg').innerText = t.emptyPricingMsg;
-
-            // تحديث نصوص أزرار التسعيرات
-            document.getElementById('addProductBtn').innerText = t.addProduct;
-            document.getElementById('addCompanyBtn').innerText = t.addCompany;
-            document.getElementById('savePricingBtn').innerText = t.savePricing;
-            document.getElementById('tempPricingBtn').innerText = t.tempCompare;
-            document.getElementById('viewArchiveBtn').innerText = t.viewArchive;
+            document.getElementById('productsListLabel').innerText = t.productsListLabel;
+            document.getElementById('companiesListLabel').innerText = t.companiesListLabel;
 
             document.getElementById('balAhliHufuf').addEventListener('input', function() {
                 data.balances.ahliHufuf = parseFloat(this.value) || 0;
@@ -1272,7 +1335,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع نظام التسعيرات المتكامل (دعم الترجمة الكامل)');
+        console.log('✅ النظام جاهز مع أزرار الحذف والترجمة الكاملة');
     </script>
 </body>
 </html>
