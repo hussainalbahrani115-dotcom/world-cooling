@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مؤسسة آفاق التبريد التجارية - World Cooling Trade</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f14; color: #e6edf3; padding: 16px; transition: 0.3s; }
@@ -90,13 +88,8 @@
             outline: none;
             line-height: 1.5;
         }
-        .price-cell:focus { 
-            border-color: #1f6feb; 
-            box-shadow: 0 0 0 2px #1f6feb44; 
-        }
-        .price-cell.empty { 
-            color: #8b949e; 
-        }
+        .price-cell:focus { border-color: #1f6feb; box-shadow: 0 0 0 2px #1f6feb44; }
+        .price-cell.empty { color: #8b949e; }
         .best-price { font-weight: bold; color: #f0883e; }
         .delete-btn { background: #da3633; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
         .delete-btn:hover { background: #f85149; }
@@ -126,13 +119,13 @@
         <div class="page active" id="page0">
             <div class="card">
                 <h2 id="titleDashboard">📊 لوحة التحكم</h2>
-                <div class="dashboard-grid" id="dashboardGrid">
-                    <div class="dash-card"><div class="icon">📄</div><div class="value" id="dashUnpaidCount">0</div><div class="label" id="dashUnpaidLabel">فواتير غير مدفوعة</div></div>
-                    <div class="dash-card"><div class="icon">💰</div><div class="value" id="dashUnpaidTotal">0.00</div><div class="label" id="dashUnpaidTotalLabel">إجمالي الديون</div></div>
-                    <div class="dash-card"><div class="icon">✅</div><div class="value" id="dashPaidToday">0.00</div><div class="label" id="dashPaidTodayLabel">مدفوعات اليوم</div></div>
-                    <div class="dash-card"><div class="icon">🏦</div><div class="value" id="dashTotalBalance">0.00</div><div class="label" id="dashTotalBalanceLabel">إجمالي الأرصدة</div></div>
+                <div class="dashboard-grid">
+                    <div class="dash-card"><div class="icon">📄</div><div class="value" id="dashUnpaidCount">0</div><div class="label">فواتير غير مدفوعة</div></div>
+                    <div class="dash-card"><div class="icon">💰</div><div class="value" id="dashUnpaidTotal">0.00</div><div class="label">إجمالي الديون</div></div>
+                    <div class="dash-card"><div class="icon">✅</div><div class="value" id="dashPaidToday">0.00</div><div class="label">مدفوعات اليوم</div></div>
+                    <div class="dash-card"><div class="icon">🏦</div><div class="value" id="dashTotalBalance">0.00</div><div class="label">إجمالي الأرصدة</div></div>
                 </div>
-                <h3 style="color:#58a6ff;margin-top:20px;" id="dashRecentTitle">📋 آخر 5 فواتير مضافة</h3>
+                <h3 style="color:#58a6ff;margin-top:20px;">📋 آخر 5 فواتير مضافة</h3>
                 <ul class="recent-list" id="dashRecentList">
                     <li style="color:#8b949e;text-align:center;padding:20px;">لا توجد فواتير بعد</li>
                 </ul>
@@ -151,7 +144,7 @@
                     <button id="addSupplierBtn">➕ إضافة</button>
                 </div>
                 <table>
-                    <thead><tr><th>#</th><th id="thNameAr">الاسم بالعربي</th><th id="thNameEn">الاسم بالإنجليزي</th><th id="thBank">البنك</th><th id="thIban">IBAN</th><th id="thAction">إجراء</th></tr></thead>
+                    <thead><tr><th>#</th><th>الاسم بالعربي</th><th>الاسم بالإنجليزي</th><th>البنك</th><th>IBAN</th><th>إجراء</th></tr></thead>
                     <tbody id="supplierBody"></tbody>
                 </table>
             </div>
@@ -161,12 +154,12 @@
         <div class="page" id="page2">
             <div class="card">
                 <h2 id="titleBalances">🏦 الأرصدة البنكية</h2>
-                <div style="color:#8b949e;font-size:14px;margin-bottom:12px;" id="balanceNote">✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).</div>
-                <div class="balance-grid" id="balanceGrid">
-                    <div class="balance-item"><label id="lblAhliHufuf">🇸🇦 الأهلي (الهفوف)</label><input type="number" id="balAhliHufuf" step="0.01" /></div>
-                    <div class="balance-item"><label id="lblAhliMubarraz">🇸🇦 الأهلي (المبرز)</label><input type="number" id="balAhliMubarraz" step="0.01" /></div>
-                    <div class="balance-item"><label id="lblFaransi">🇫🇷 الفرنسي</label><input type="number" id="balFaransi" step="0.01" /></div>
-                    <div class="balance-item"><label id="lblInma">🇸🇦 الإنماء</label><input type="number" id="balInma" step="0.01" /></div>
+                <div style="color:#8b949e;font-size:14px;margin-bottom:12px;">✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).</div>
+                <div class="balance-grid">
+                    <div class="balance-item"><label>🇸🇦 الأهلي (الهفوف)</label><input type="number" id="balAhliHufuf" step="0.01" /></div>
+                    <div class="balance-item"><label>🇸🇦 الأهلي (المبرز)</label><input type="number" id="balAhliMubarraz" step="0.01" /></div>
+                    <div class="balance-item"><label>🇫🇷 الفرنسي</label><input type="number" id="balFaransi" step="0.01" /></div>
+                    <div class="balance-item"><label>🇸🇦 الإنماء</label><input type="number" id="balInma" step="0.01" /></div>
                 </div>
                 <div class="total-box" id="totalBalance">المجموع: 0.00 ريال</div>
             </div>
@@ -182,9 +175,9 @@
                     <input type="number" id="invoiceAmount" placeholder="المبلغ" step="0.01" />
                     <button id="addInvoiceBtn">➕ إضافة فاتورة</button>
                 </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;" id="invoiceHint">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;">* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.</div>
                 <table>
-                    <thead><tr><th>#</th><th id="thCompany">الشركة</th><th id="thAmount">المبلغ</th><th id="thDate">تاريخ الإضافة</th><th id="thStatus">الحالة</th><th id="thPayBank">بنك الدفع</th><th id="thAction2">إجراء</th></tr></thead>
+                    <thead><tr><th>#</th><th>الشركة</th><th>المبلغ</th><th>تاريخ الإضافة</th><th>الحالة</th><th>بنك الدفع</th><th>إجراء</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
                 </table>
                 <div class="total-box" id="totalInvoices">إجمالي المدفوعات: 0.00 ريال</div>
@@ -197,21 +190,21 @@
                 <h2 id="titleReports">📊 التقارير المالية</h2>
                 <div class="filter-row">
                     <div class="flex-row">
-                        <label id="lblDateFrom">📅 من تاريخ: <input type="date" id="reportDateFrom" /></label>
-                        <label id="lblDateTo">📅 إلى تاريخ: <input type="date" id="reportDateTo" /></label>
+                        <label>📅 من تاريخ: <input type="date" id="reportDateFrom" /></label>
+                        <label>📅 إلى تاريخ: <input type="date" id="reportDateTo" /></label>
                         <select id="reportSupplierFilter" style="flex:1.5;min-width:180px;"><option value="">-- جميع الموردين --</option></select>
                         <button id="applyReportBtn" class="success">🔍 بحث</button>
                         <button id="resetReportBtn">🔄 إعادة ضبط</button>
                     </div>
                 </div>
-                <div class="report-summary" id="reportSummary">
-                    <div class="stat"><div class="num" id="statCount">0</div><div class="label" id="statCountLabel">عدد الفواتير</div></div>
-                    <div class="stat"><div class="num" id="statTotal">0.00</div><div class="label" id="statTotalLabel">إجمالي المبلغ</div></div>
-                    <div class="stat"><div class="num" id="statPaid">0.00</div><div class="label" id="statPaidLabel">المدفوع</div></div>
-                    <div class="stat"><div class="num" id="statUnpaid">0.00</div><div class="label" id="statUnpaidLabel">غير المدفوع</div></div>
+                <div class="report-summary">
+                    <div class="stat"><div class="num" id="statCount">0</div><div class="label">عدد الفواتير</div></div>
+                    <div class="stat"><div class="num" id="statTotal">0.00</div><div class="label">إجمالي المبلغ</div></div>
+                    <div class="stat"><div class="num" id="statPaid">0.00</div><div class="label">المدفوع</div></div>
+                    <div class="stat"><div class="num" id="statUnpaid">0.00</div><div class="label">غير المدفوع</div></div>
                 </div>
                 <table>
-                    <thead><tr><th>#</th><th id="repCompany">الشركة</th><th id="repAmount">المبلغ</th><th id="repDateAdded">تاريخ الإضافة</th><th id="repDatePaid">تاريخ الدفع</th><th id="repStatus">الحالة</th><th id="repBank">بنك الدفع</th></tr></thead>
+                    <thead><tr><th>#</th><th>الشركة</th><th>المبلغ</th><th>تاريخ الإضافة</th><th>تاريخ الدفع</th><th>الحالة</th><th>بنك الدفع</th></tr></thead>
                     <tbody id="reportBody"></tbody>
                 </table>
                 <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;"><button id="exportReportBtn" class="success">📥 تصدير التقرير (CSV)</button></div>
@@ -223,35 +216,23 @@
             <div class="card">
                 <h2 id="titlePricing">📊 نظام مقارنة التسعيرات</h2>
                 <div class="flex-row" style="margin-bottom:15px;">
-                    <button id="addProductBtn" class="success" id="addProductBtn">➕ إضافة منتج</button>
-                    <button id="addCompanyBtn" class="success" id="addCompanyBtn">➕ إضافة شركة</button>
-                    <button id="savePricingBtn" class="success" id="savePricingBtn">💾 حفظ التسعيرة</button>
-                    <button id="tempPricingBtn" class="warning" id="tempPricingBtn">🔄 مقارنة فقط</button>
-                    <button id="viewArchiveBtn" id="viewArchiveBtn">📋 عرض الأرشيف</button>
+                    <button id="addProductBtn" class="success">➕ إضافة منتج</button>
+                    <button id="addCompanyBtn" class="success">➕ إضافة شركة</button>
+                    <button id="savePricingBtn" class="success">💾 حفظ التسعيرة</button>
+                    <button id="tempPricingBtn" class="warning">🔄 مقارنة فقط</button>
+                    <button id="viewArchiveBtn">📋 عرض الأرشيف</button>
                 </div>
-                <!-- قوائم المنتجات والشركات مع أزرار الحذف -->
                 <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:15px;padding:10px;background:#0d1117;border-radius:12px;border:1px solid #30363d;">
-                    <div>
-                        <strong id="productsListLabel">📦 المنتجات:</strong>
-                        <div id="productsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div>
-                    </div>
-                    <div>
-                        <strong id="companiesListLabel">🏢 الشركات:</strong>
-                        <div id="companiesList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div>
-                    </div>
+                    <div><strong>📦 المنتجات:</strong><div id="productsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div></div>
+                    <div><strong>🏢 الشركات:</strong><div id="companiesList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;"></div></div>
                 </div>
                 <div class="pricing-table-wrap">
                     <table id="pricingTable">
                         <thead id="pricingHead">
-                            <tr>
-                                <th>#</th>
-                                <th id="thProduct">المنتج</th>
-                                <!-- سيتم إضافة الأعمدة بواسطة JavaScript -->
-                                <th id="thBestPrice">🏆 أقل سعر</th>
-                            </tr>
+                            <tr><th>#</th><th>المنتج</th><th id="pricingCompaniesHead"></th><th>🏆 أقل سعر</th></tr>
                         </thead>
                         <tbody id="pricingBody">
-                            <tr><td colspan="10" class="empty-msg" id="emptyPricingMsg">لا توجد منتجات أو شركات مضافة. أضف منتجاً وشركة للبدء.</td></tr>
+                            <tr><td colspan="10" class="empty-msg">لا توجد منتجات أو شركات مضافة. أضف منتجاً وشركة للبدء.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -261,59 +242,59 @@
 
     <script>
         // ============================================================
-        //  🔥 Firebase Config (تم التحديث بالبيانات الصحيحة)
+        //  تكوين PocketBase
         // ============================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyAcQUAXhudSDku_hQCBbOjbjrzPnJT3A",
-            authDomain: "world-cooling.firebaseapp.com",
-            projectId: "world-cooling",
-            storageBucket: "world-cooling.firebasestorage.app",
-            messagingSenderId: "33761426937",
-            appId: "1:33761426937:web:a0b87ef02d6b8d86c1128"
+        const PB_URL = 'http://127.0.0.1:8090';
+        const COLLECTIONS = {
+            products: 'products',
+            companies: 'companies',
+            pricing: 'pricing'
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        // ============================================================
+        //  دوال مساعدة للتواصل مع PocketBase API
+        // ============================================================
+        async function pbGet(collection) {
+            const res = await fetch(`${PB_URL}/api/collections/${collection}/records`);
+            return res.json();
+        }
+
+        async function pbCreate(collection, data) {
+            const res = await fetch(`${PB_URL}/api/collections/${collection}/records`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return res.json();
+        }
+
+        async function pbUpdate(collection, id, data) {
+            const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return res.json();
+        }
+
+        async function pbDelete(collection, id) {
+            const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
+                method: 'DELETE'
+            });
+            return res.json();
+        }
 
         // ============================================================
-        //  البيانات العامة
+        //  البيانات
         // ============================================================
-        let data = {
-            suppliers: [],
-            balances: { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 },
-            invoices: []
-        };
+        let suppliers = [];
+        let invoices = [];
+        let balances = { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 };
+        let products = [];
+        let companies = [];
+        let pricing = [];
 
-        let isSaving = false;
-        let lastSavedData = '';
         let currentLang = 'ar';
-
-        // ============================================================
-        //  نظام التسعيرات
-        // ============================================================
-        let pricing = {
-            products: [],
-            companies: [],
-            prices: {} // key: `${productId}_${companyId}` => price
-        };
-
-        // ============================================================
-        //  البنوك
-        // ============================================================
-        const BANK_OPTIONS = {
-            ar: [
-                { value: 'الأهلي (الهفوف)', label: 'الأهلي (الهفوف)' },
-                { value: 'الأهلي (المبرز)', label: 'الأهلي (المبرز)' },
-                { value: 'الفرنسي', label: 'الفرنسي' },
-                { value: 'الإنماء', label: 'الإنماء' }
-            ],
-            en: [
-                { value: 'AlAhli (Hufuf)', label: 'AlAhli (Hufuf)' },
-                { value: 'AlAhli (Mubarraz)', label: 'AlAhli (Mubarraz)' },
-                { value: 'French Bank', label: 'French Bank' },
-                { value: 'AlInma', label: 'AlInma' }
-            ]
-        };
 
         // ============================================================
         //  دوال التاريخ
@@ -342,7 +323,7 @@
         }
 
         // ============================================================
-        //  الترجمة الكاملة (شاملة جميع النصوص)
+        //  الترجمة
         // ============================================================
         const LANG = {
             ar: {
@@ -354,11 +335,6 @@
                 tab4: '📊 التقارير',
                 tab5: '📊 التسعيرات',
                 titleDashboard: '📊 لوحة التحكم',
-                dashUnpaidLabel: 'فواتير غير مدفوعة',
-                dashUnpaidTotalLabel: 'إجمالي الديون',
-                dashPaidTodayLabel: 'مدفوعات اليوم',
-                dashTotalBalanceLabel: 'إجمالي الأرصدة',
-                dashRecentTitle: '📋 آخر 5 فواتير مضافة',
                 titleSuppliers: '🗂️ إدارة الموردين',
                 titleBalances: '🏦 الأرصدة البنكية',
                 titleInvoices: '📄 الفواتير المستحقة للسداد',
@@ -369,23 +345,8 @@
                 savePricing: '💾 حفظ التسعيرة',
                 compareOnly: '🔄 مقارنة فقط',
                 viewArchive: '📋 عرض الأرشيف',
-                productsListLabel: '📦 المنتجات:',
-                companiesListLabel: '🏢 الشركات:',
                 noProducts: 'لا توجد منتجات',
                 noCompanies: 'لا توجد شركات',
-                thNameAr: 'الاسم بالعربي',
-                thNameEn: 'الاسم بالإنجليزي',
-                thBank: 'البنك',
-                thIban: 'IBAN',
-                thAction: 'إجراء',
-                thCompany: 'الشركة',
-                thAmount: 'المبلغ',
-                thDate: 'تاريخ الإضافة',
-                thStatus: 'الحالة',
-                thPayBank: 'بنك الدفع',
-                thAction2: 'إجراء',
-                thProduct: 'المنتج',
-                thBestPrice: '🏆 أقل سعر',
                 emptyPricingMsg: 'لا توجد منتجات أو شركات مضافة. أضف منتجاً وشركة للبدء.',
                 totalBalance: 'المجموع:',
                 totalInvoices: 'إجمالي المدفوعات:',
@@ -417,12 +378,6 @@
                 exportBtn: '📥 تصدير التقرير (CSV)',
                 lblDateFrom: '📅 من تاريخ:',
                 lblDateTo: '📅 إلى تاريخ:',
-                repCompany: 'الشركة',
-                repAmount: 'المبلغ',
-                repDateAdded: 'تاريخ الإضافة',
-                repDatePaid: 'تاريخ الدفع',
-                repStatus: 'الحالة',
-                repBank: 'بنك الدفع',
                 allSuppliers: '-- جميع الموردين --',
                 invoiceHint: '* اختر مورد من القائمة أو اكتب اسماً جديداً في الحقل الثاني.',
                 balanceNote: '✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).',
@@ -433,17 +388,7 @@
                 syncSaving: '⏳ جارٍ الحفظ...',
                 syncSaved: '✅ تم الحفظ في السحابة',
                 syncSaveFailed: '❌ فشل الحفظ',
-                syncUpdated: '🔄 تم التحديث من جهاز آخر',
-                lblAhliHufuf: '🇸🇦 الأهلي (الهفوف)',
-                lblAhliMubarraz: '🇸🇦 الأهلي (المبرز)',
-                lblFaransi: '🇫🇷 الفرنسي',
-                lblInma: '🇸🇦 الإنماء',
-                deleteProduct: 'حذف المنتج',
-                deleteCompany: 'حذف الشركة',
-                confirmDeleteProduct: 'هل أنت متأكد من حذف هذا المنتج؟',
-                confirmDeleteCompany: 'هل أنت متأكد من حذف هذه الشركة؟',
-                productDeleted: 'تم حذف المنتج بنجاح',
-                companyDeleted: 'تم حذف الشركة بنجاح'
+                syncUpdated: '🔄 تم التحديث من جهاز آخر'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -454,11 +399,6 @@
                 tab4: '📊 Reports',
                 tab5: '📊 Pricing',
                 titleDashboard: '📊 Dashboard',
-                dashUnpaidLabel: 'Unpaid Invoices',
-                dashUnpaidTotalLabel: 'Total Debt',
-                dashPaidTodayLabel: "Today's Payments",
-                dashTotalBalanceLabel: 'Total Balance',
-                dashRecentTitle: '📋 Last 5 Invoices',
                 titleSuppliers: '🗂️ Supplier Management',
                 titleBalances: '🏦 Bank Balances',
                 titleInvoices: '📄 Pending Invoices',
@@ -469,23 +409,8 @@
                 savePricing: '💾 Save Pricing',
                 compareOnly: '🔄 Compare Only',
                 viewArchive: '📋 View Archive',
-                productsListLabel: '📦 Products:',
-                companiesListLabel: '🏢 Companies:',
                 noProducts: 'No products',
                 noCompanies: 'No companies',
-                thNameAr: 'Name (Arabic)',
-                thNameEn: 'Name (English)',
-                thBank: 'Bank',
-                thIban: 'IBAN',
-                thAction: 'Action',
-                thCompany: 'Company',
-                thAmount: 'Amount',
-                thDate: 'Added Date',
-                thStatus: 'Status',
-                thPayBank: 'Payment Bank',
-                thAction2: 'Action',
-                thProduct: 'Product',
-                thBestPrice: '🏆 Best Price',
                 emptyPricingMsg: 'No products or companies added. Add a product and a company to start.',
                 totalBalance: 'Total:',
                 totalInvoices: 'Total Payments:',
@@ -517,12 +442,6 @@
                 exportBtn: '📥 Export Report (CSV)',
                 lblDateFrom: '📅 From Date:',
                 lblDateTo: '📅 To Date:',
-                repCompany: 'Company',
-                repAmount: 'Amount',
-                repDateAdded: 'Added Date',
-                repDatePaid: 'Payment Date',
-                repStatus: 'Status',
-                repBank: 'Payment Bank',
                 allSuppliers: '-- All Suppliers --',
                 invoiceHint: '* Select a supplier from the list or enter a new name in the second field.',
                 balanceNote: '✏️ Balances are updated manually daily (not linked to invoices).',
@@ -533,95 +452,68 @@
                 syncSaving: '⏳ Saving...',
                 syncSaved: '✅ Saved to cloud',
                 syncSaveFailed: '❌ Save failed',
-                syncUpdated: '🔄 Updated from another device',
-                lblAhliHufuf: '🇸🇦 AlAhli (Hufuf)',
-                lblAhliMubarraz: '🇸🇦 AlAhli (Mubarraz)',
-                lblFaransi: '🇫🇷 French Bank',
-                lblInma: '🇸🇦 AlInma',
-                deleteProduct: 'Delete Product',
-                deleteCompany: 'Delete Company',
-                confirmDeleteProduct: 'Are you sure you want to delete this product?',
-                confirmDeleteCompany: 'Are you sure you want to delete this company?',
-                productDeleted: 'Product deleted successfully',
-                companyDeleted: 'Company deleted successfully'
+                syncUpdated: '🔄 Updated from another device'
             }
         };
 
         // ============================================================
-        //  المزامنة (البيانات الرئيسية)
+        //  تحميل البيانات من PocketBase
         // ============================================================
-        function setSyncStatus(text, type = 'loading') {
-            const el = document.getElementById('syncStatus');
-            el.innerText = text;
-            el.className = 'sync-status';
-            if (type === 'saved') el.classList.add('saved');
-            if (type === 'error') el.classList.add('error');
-        }
-
-        async function loadFromCloud() {
+        async function loadData() {
             try {
-                setSyncStatus(LANG[currentLang].syncLoading, 'loading');
-                const doc = await db.collection('appData').doc('mainData').get();
-                if (doc.exists) {
-                    const cloudData = doc.data();
-                    if (cloudData && cloudData.suppliers) {
-                        data = cloudData;
-                        if (!data.balances) data.balances = { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 };
-                        if (!data.invoices) data.invoices = [];
-                        data.invoices.forEach(inv => {
-                            if (!inv.date) inv.date = getToday();
-                            if (inv.paid === undefined) inv.paid = false;
-                            if (!inv.payBank) inv.payBank = '';
-                            if (!inv.payDate) inv.payDate = '';
-                        });
-                        refreshAll();
-                        setSyncStatus(LANG[currentLang].syncLoaded, 'saved');
-                        return;
-                    }
+                // تحميل الموردين (نحن نستخدم companies كـ موردين)
+                const companiesData = await pbGet(COLLECTIONS.companies);
+                suppliers = companiesData.items || [];
+                
+                // تحميل الفواتير (نحن نستخدم pricing كـ فواتير مؤقتة)
+                const pricingData = await pbGet(COLLECTIONS.pricing);
+                invoices = pricingData.items || [];
+                
+                // تحميل المنتجات
+                const productsData = await pbGet(COLLECTIONS.products);
+                products = productsData.items || [];
+                
+                // تحميل الشركات (مرة أخرى للتسعيرات)
+                companies = companiesData.items || [];
+                
+                // تحميل التسعيرات (نفس الفواتير مؤقتاً)
+                pricing = pricingData.items || [];
+                
+                // تحميل الأرصدة من localStorage (مؤقتاً)
+                const savedBalances = localStorage.getItem('balances_pb');
+                if (savedBalances) {
+                    balances = JSON.parse(savedBalances);
                 }
-                setSyncStatus(LANG[currentLang].syncNoData, 'saved');
-                refreshAll();
+                
+                setSyncStatus(LANG[currentLang].syncLoaded, 'saved');
             } catch (error) {
-                console.error(error);
+                console.error('خطأ في تحميل البيانات:', error);
                 setSyncStatus(LANG[currentLang].syncError, 'error');
-                refreshAll();
             }
+            refreshAll();
         }
 
-        async function saveToCloud() {
-            const currentDataStr = JSON.stringify(data);
-            if (currentDataStr === lastSavedData && lastSavedData !== '') return;
-            if (isSaving) return;
-            isSaving = true;
-            try {
-                setSyncStatus(LANG[currentLang].syncSaving, 'loading');
-                await db.collection('appData').doc('mainData').set(data);
-                lastSavedData = currentDataStr;
-                setSyncStatus(LANG[currentLang].syncSaved, 'saved');
-            } catch (error) {
-                console.error(error);
-                setSyncStatus(LANG[currentLang].syncSaveFailed, 'error');
-            } finally {
-                isSaving = false;
-            }
+        // حفظ الأرصدة محلياً (مؤقتاً)
+        function saveBalances() {
+            localStorage.setItem('balances_pb', JSON.stringify(balances));
         }
 
         // ============================================================
-        //  دوال العرض (البيانات الرئيسية)
+        //  العرض
         // ============================================================
         function renderSuppliers() {
             const tbody = document.getElementById('supplierBody');
-            if (data.suppliers.length === 0) {
+            if (suppliers.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="empty-msg">${LANG[currentLang].emptySuppliers}</td></tr>`;
                 return;
             }
-            tbody.innerHTML = data.suppliers.map((s, idx) => `
+            tbody.innerHTML = suppliers.map((s, idx) => `
                 <tr>
                     <td>${idx+1}</td>
-                    <td><input type="text" value="${s.nameAr}" data-id="${s.id}" class="edit-supplier-nameAr" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
-                    <td><input type="text" value="${s.nameEn || ''}" data-id="${s.id}" class="edit-supplier-nameEn" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
-                    <td><input type="text" value="${s.bank || ''}" data-id="${s.id}" class="edit-supplier-bank" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
-                    <td><input type="text" value="${s.iban}" data-id="${s.id}" class="edit-supplier-iban" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="${s.name || ''}" data-id="${s.id}" class="edit-supplier-name" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="${s.name || ''}" data-id="${s.id}" class="edit-supplier-nameEn" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="" data-id="${s.id}" class="edit-supplier-bank" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                    <td><input type="text" value="" data-id="${s.id}" class="edit-supplier-iban" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                     <td class="actions">
                         <button class="danger btn-sm" onclick="deleteSupplier('${s.id}')">${LANG[currentLang].delete}</button>
                         <button class="btn-sm" onclick="updateSupplier('${s.id}')">${LANG[currentLang].save}</button>
@@ -633,22 +525,26 @@
 
         function renderInvoices() {
             const tbody = document.getElementById('invoiceBody');
-            if (data.invoices.length === 0) {
+            if (invoices.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyInvoices}</td></tr>`;
                 document.getElementById('totalInvoices').innerHTML = `${LANG[currentLang].totalInvoices} 0.00 ريال`;
                 return;
             }
             let totalPaid = 0;
-            tbody.innerHTML = data.invoices.map((inv, idx) => {
-                if (inv.paid) totalPaid += inv.amount;
+            tbody.innerHTML = invoices.map((inv, idx) => {
+                const amount = inv.price || 0;
+                const company = inv.expand?.company?.name || 'غير معروف';
+                const product = inv.expand?.product?.name || 'غير معروف';
+                const date = inv.date || inv.created || getToday();
+                if (inv.paid) totalPaid += amount;
                 const status = inv.paid ? `<span class="badge-paid">${LANG[currentLang].paid}</span>` : `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
                 const payBank = inv.payBank || '-';
-                const dateDisplay = formatDate(inv.date, currentLang);
+                const dateDisplay = formatDate(date, currentLang);
                 return `
                     <tr>
                         <td>${idx+1}</td>
-                        <td><input type="text" value="${inv.company}" data-id="${inv.id}" class="edit-inv-company" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
-                        <td><input type="number" value="${inv.amount}" data-id="${inv.id}" class="edit-inv-amount" step="0.01" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                        <td><input type="text" value="${company}" data-id="${inv.id}" class="edit-inv-company" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
+                        <td><input type="number" value="${amount}" data-id="${inv.id}" class="edit-inv-amount" step="0.01" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;" /></td>
                         <td>${dateDisplay}</td>
                         <td>${status}</td>
                         <td>${payBank}</td>
@@ -665,11 +561,11 @@
         }
 
         function renderBalances() {
-            document.getElementById('balAhliHufuf').value = data.balances.ahliHufuf || 0;
-            document.getElementById('balAhliMubarraz').value = data.balances.ahliMubarraz || 0;
-            document.getElementById('balFaransi').value = data.balances.faransi || 0;
-            document.getElementById('balInma').value = data.balances.inma || 0;
-            const sum = (data.balances.ahliHufuf || 0) + (data.balances.ahliMubarraz || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
+            document.getElementById('balAhliHufuf').value = balances.ahliHufuf || 0;
+            document.getElementById('balAhliMubarraz').value = balances.ahliMubarraz || 0;
+            document.getElementById('balFaransi').value = balances.faransi || 0;
+            document.getElementById('balInma').value = balances.inma || 0;
+            const sum = (balances.ahliHufuf || 0) + (balances.ahliMubarraz || 0) + (balances.faransi || 0) + (balances.inma || 0);
             document.getElementById('totalBalance').innerHTML = `${LANG[currentLang].totalBalance} ${sum.toFixed(2)} ريال`;
         }
 
@@ -677,18 +573,18 @@
             const select = document.getElementById('invoiceSupplierSelect');
             const currentVal = select.value;
             select.innerHTML = `<option value="">${LANG[currentLang].selectDefault}</option>`;
-            data.suppliers.forEach(s => {
-                const label = s.nameAr + (s.nameEn ? ` (${s.nameEn})` : '');
-                select.innerHTML += `<option value="${s.nameAr}">${label}</option>`;
+            suppliers.forEach(s => {
+                const label = s.name || s.nameAr || 'غير معروف';
+                select.innerHTML += `<option value="${label}">${label}</option>`;
             });
             if (currentVal) select.value = currentVal;
 
             const reportSelect = document.getElementById('reportSupplierFilter');
             const repVal = reportSelect.value;
             reportSelect.innerHTML = `<option value="">${LANG[currentLang].allSuppliers}</option>`;
-            data.suppliers.forEach(s => {
-                const label = s.nameAr + (s.nameEn ? ` (${s.nameEn})` : '');
-                reportSelect.innerHTML += `<option value="${s.nameAr}">${label}</option>`;
+            suppliers.forEach(s => {
+                const label = s.name || s.nameAr || 'غير معروف';
+                reportSelect.innerHTML += `<option value="${label}">${label}</option>`;
             });
             if (repVal) reportSelect.value = repVal;
         }
@@ -698,31 +594,34 @@
         // ============================================================
         function updateDashboard() {
             const today = getToday();
-            const unpaid = data.invoices.filter(inv => !inv.paid);
-            const paidToday = data.invoices.filter(inv => inv.paid && inv.payDate === today);
+            const unpaid = invoices.filter(inv => !inv.paid);
+            const paidToday = invoices.filter(inv => inv.paid && inv.payDate === today);
 
             const unpaidCount = unpaid.length;
-            const unpaidTotal = unpaid.reduce((sum, inv) => sum + inv.amount, 0);
-            const paidTodayTotal = paidToday.reduce((sum, inv) => sum + inv.amount, 0);
-            const totalBalance = (data.balances.ahliHufuf || 0) + (data.balances.ahliMubarraz || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
+            const unpaidTotal = unpaid.reduce((sum, inv) => sum + (inv.price || 0), 0);
+            const paidTodayTotal = paidToday.reduce((sum, inv) => sum + (inv.price || 0), 0);
+            const totalBalance = (balances.ahliHufuf || 0) + (balances.ahliMubarraz || 0) + (balances.faransi || 0) + (balances.inma || 0);
 
             document.getElementById('dashUnpaidCount').innerText = unpaidCount;
             document.getElementById('dashUnpaidTotal').innerText = unpaidTotal.toFixed(2);
             document.getElementById('dashPaidToday').innerText = paidTodayTotal.toFixed(2);
             document.getElementById('dashTotalBalance').innerText = totalBalance.toFixed(2);
 
-            const recent = [...data.invoices].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            const recent = [...invoices].sort((a, b) => new Date(b.created || b.date) - new Date(a.created || a.date)).slice(0, 5);
             const list = document.getElementById('dashRecentList');
             if (recent.length === 0) {
                 list.innerHTML = `<li style="color:#8b949e;text-align:center;padding:20px;">لا توجد فواتير بعد</li>`;
             } else {
-                list.innerHTML = recent.map(inv => `
-                    <li>
-                        <span class="company">${inv.company}</span>
-                        <span class="amount">${inv.amount.toFixed(2)} ريال</span>
-                        <span class="date">${formatDate(inv.date, currentLang)}</span>
-                    </li>
-                `).join('');
+                list.innerHTML = recent.map(inv => {
+                    const company = inv.expand?.company?.name || 'غير معروف';
+                    return `
+                        <li>
+                            <span class="company">${company}</span>
+                            <span class="amount">${(inv.price || 0).toFixed(2)} ريال</span>
+                            <span class="date">${formatDate(inv.date || inv.created || getToday(), currentLang)}</span>
+                        </li>
+                    `;
+                }).join('');
             }
         }
 
@@ -733,263 +632,202 @@
             updateSupplierDropdowns();
             updateLiveDate();
             updateDashboard();
-            renderPricingTable();
             renderProductsAndCompanies();
-            // تحديث نصوص أزرار التسعيرات
+            renderPricingTable();
+            // تحديث الترجمة للأزرار
             document.getElementById('addProductBtn').innerHTML = LANG[currentLang].addProduct;
             document.getElementById('addCompanyBtn').innerHTML = LANG[currentLang].addCompany;
             document.getElementById('savePricingBtn').innerHTML = LANG[currentLang].savePricing;
             document.getElementById('tempPricingBtn').innerHTML = LANG[currentLang].compareOnly;
             document.getElementById('viewArchiveBtn').innerHTML = LANG[currentLang].viewArchive;
-            
-            document.getElementById('invoiceHint').innerText = LANG[currentLang].invoiceHint;
-            document.getElementById('balanceNote').innerText = LANG[currentLang].balanceNote;
-            document.getElementById('lblAhliHufuf').innerHTML = LANG[currentLang].lblAhliHufuf;
-            document.getElementById('lblAhliMubarraz').innerHTML = LANG[currentLang].lblAhliMubarraz;
-            document.getElementById('lblFaransi').innerHTML = LANG[currentLang].lblFaransi;
-            document.getElementById('lblInma').innerHTML = LANG[currentLang].lblInma;
-            document.getElementById('productsListLabel').innerText = LANG[currentLang].productsListLabel;
-            document.getElementById('companiesListLabel').innerText = LANG[currentLang].companiesListLabel;
-            document.getElementById('emptyPricingMsg').innerText = LANG[currentLang].emptyPricingMsg;
-            saveToCloud();
         }
 
         // ============================================================
-        //  عمليات الموردين والفواتير
+        //  عمليات الموردين (companies)
         // ============================================================
-        function addSupplier() {
-            const nameAr = document.getElementById('supplierNameAr').value.trim();
-            const nameEn = document.getElementById('supplierNameEn').value.trim();
-            const bank = document.getElementById('supplierBank').value.trim();
-            const iban = document.getElementById('supplierIban').value.trim();
-            if (!nameAr || !iban) { alert(LANG[currentLang].alertFillFields); return; }
-            data.suppliers.push({ id: crypto.randomUUID(), nameAr, nameEn, bank, iban });
-            document.getElementById('supplierNameAr').value = '';
-            document.getElementById('supplierNameEn').value = '';
-            document.getElementById('supplierBank').value = '';
-            document.getElementById('supplierIban').value = '';
-            refreshAll();
-        }
-
-        function deleteSupplier(id) {
-            if (!confirm(LANG[currentLang].confirmDelete)) return;
-            data.suppliers = data.suppliers.filter(s => s.id !== id);
-            refreshAll();
-        }
-
-        function updateSupplier(id) {
-            const nameArInput = document.querySelector(`.edit-supplier-nameAr[data-id="${id}"]`);
-            const nameEnInput = document.querySelector(`.edit-supplier-nameEn[data-id="${id}"]`);
-            const bankInput = document.querySelector(`.edit-supplier-bank[data-id="${id}"]`);
-            const ibanInput = document.querySelector(`.edit-supplier-iban[data-id="${id}"]`);
-            if (!nameArInput || !ibanInput) return;
-            const supplier = data.suppliers.find(s => s.id === id);
-            if (supplier) {
-                supplier.nameAr = nameArInput.value.trim() || supplier.nameAr;
-                supplier.nameEn = nameEnInput.value.trim() || supplier.nameEn;
-                supplier.bank = bankInput.value.trim() || supplier.bank;
-                supplier.iban = ibanInput.value.trim() || supplier.iban;
-                refreshAll();
+        async function addSupplier() {
+            const name = document.getElementById('supplierNameAr').value.trim() || document.getElementById('supplierNameEn').value.trim();
+            if (!name) { alert(LANG[currentLang].alertFillFields); return; }
+            try {
+                await pbCreate(COLLECTIONS.companies, { name });
+                await loadData();
+                document.getElementById('supplierNameAr').value = '';
+                document.getElementById('supplierNameEn').value = '';
+            } catch (error) {
+                console.error('خطأ في إضافة المورد:', error);
+                alert('فشل إضافة المورد');
             }
         }
 
-        function addInvoice() {
+        async function deleteSupplier(id) {
+            if (!confirm(LANG[currentLang].confirmDelete)) return;
+            try {
+                await pbDelete(COLLECTIONS.companies, id);
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في حذف المورد:', error);
+                alert('فشل حذف المورد');
+            }
+        }
+
+        async function updateSupplier(id) {
+            const nameInput = document.querySelector(`.edit-supplier-name[data-id="${id}"]`);
+            const name = nameInput?.value?.trim();
+            if (!name) return;
+            try {
+                await pbUpdate(COLLECTIONS.companies, id, { name });
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في تحديث المورد:', error);
+                alert('فشل تحديث المورد');
+            }
+        }
+
+        // ============================================================
+        //  عمليات الفواتير (pricing)
+        // ============================================================
+        async function addInvoice() {
             const selectedSupplier = document.getElementById('invoiceSupplierSelect').value.trim();
             const newCompany = document.getElementById('invoiceCompanyNew').value.trim();
             const amount = parseFloat(document.getElementById('invoiceAmount').value);
 
-            let company = selectedSupplier;
-            if (newCompany && !selectedSupplier) {
-                company = newCompany;
-            } else if (!selectedSupplier && !newCompany) {
-                alert(LANG[currentLang].alertFillFields);
-                return;
-            }
-
+            let companyName = selectedSupplier || newCompany;
+            if (!companyName) { alert(LANG[currentLang].alertFillFields); return; }
             if (isNaN(amount) || amount <= 0) { alert(LANG[currentLang].alertValidAmount); return; }
 
-            data.invoices.push({ 
-                id: crypto.randomUUID(), 
-                company, 
-                amount, 
-                date: getToday(),
-                paid: false,
-                payBank: '',
-                payDate: ''
-            });
-            document.getElementById('invoiceCompanyNew').value = '';
-            document.getElementById('invoiceAmount').value = '';
-            
-            // إرسال إشعار
-            fetch("https://script.google.com/macros/s/AKfycbyInpQ96mm09Ge5NGlWpdDRYqD-WyhwBaCsoeHLirFPHrDiDf2poqShp1X9UP4iVWpM1g/exec", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ company, amount, date: getToday() })
-            }).catch(err => console.log('خطأ في الإشعار:', err));
-            
-            refreshAll();
+            // البحث عن الشركة أو إنشاؤها
+            let company = suppliers.find(s => s.name === companyName);
+            if (!company) {
+                try {
+                    const newCompanyData = await pbCreate(COLLECTIONS.companies, { name: companyName });
+                    company = newCompanyData;
+                    await loadData();
+                } catch (error) {
+                    console.error('خطأ في إنشاء الشركة:', error);
+                    alert('فشل إنشاء الشركة');
+                    return;
+                }
+            }
+
+            // البحث عن المنتج أو إنشاؤه (افتراضي)
+            let product = products.find(p => p.name === 'فاتورة');
+            if (!product) {
+                try {
+                    const newProduct = await pbCreate(COLLECTIONS.products, { name: 'فاتورة' });
+                    product = newProduct;
+                    await loadData();
+                } catch (error) {
+                    console.error('خطأ في إنشاء المنتج:', error);
+                    alert('فشل إنشاء المنتج');
+                    return;
+                }
+            }
+
+            try {
+                await pbCreate(COLLECTIONS.pricing, {
+                    product: product.id,
+                    company: company.id,
+                    price: amount,
+                    date: getToday(),
+                    paid: false,
+                    payBank: '',
+                    payDate: ''
+                });
+                await loadData();
+                document.getElementById('invoiceCompanyNew').value = '';
+                document.getElementById('invoiceAmount').value = '';
+            } catch (error) {
+                console.error('خطأ في إضافة الفاتورة:', error);
+                alert('فشل إضافة الفاتورة');
+            }
         }
 
-        function deleteInvoice(id) {
+        async function deleteInvoice(id) {
             if (!confirm(LANG[currentLang].confirmDelete)) return;
-            data.invoices = data.invoices.filter(inv => inv.id !== id);
-            refreshAll();
+            try {
+                await pbDelete(COLLECTIONS.pricing, id);
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في حذف الفاتورة:', error);
+                alert('فشل حذف الفاتورة');
+            }
         }
 
-        function updateInvoice(id) {
+        async function updateInvoice(id) {
             const compInput = document.querySelector(`.edit-inv-company[data-id="${id}"]`);
             const amtInput = document.querySelector(`.edit-inv-amount[data-id="${id}"]`);
             if (!compInput || !amtInput) return;
-            const invoice = data.invoices.find(inv => inv.id === id);
-            if (invoice) {
-                invoice.company = compInput.value.trim() || invoice.company;
-                invoice.amount = parseFloat(amtInput.value) || invoice.amount;
-                refreshAll();
+            const companyName = compInput.value.trim();
+            const amount = parseFloat(amtInput.value);
+            if (!companyName || isNaN(amount)) return;
+
+            // البحث عن الشركة
+            let company = suppliers.find(s => s.name === companyName);
+            if (!company) {
+                try {
+                    const newCompany = await pbCreate(COLLECTIONS.companies, { name: companyName });
+                    company = newCompany;
+                    await loadData();
+                } catch (error) {
+                    console.error('خطأ في تحديث الشركة:', error);
+                    alert('فشل تحديث الشركة');
+                    return;
+                }
+            }
+
+            try {
+                await pbUpdate(COLLECTIONS.pricing, id, {
+                    company: company.id,
+                    price: amount
+                });
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في تحديث الفاتورة:', error);
+                alert('فشل تحديث الفاتورة');
             }
         }
 
-        function markAsPaid(id) {
-            const invoice = data.invoices.find(inv => inv.id === id);
+        async function markAsPaid(id) {
+            const invoice = invoices.find(inv => inv.id === id);
             if (!invoice) return;
             if (!confirm(LANG[currentLang].confirmPay)) return;
 
-            const banks = BANK_OPTIONS[currentLang];
-            let msg = currentLang === 'ar' ? 'اختر البنك الذي دُفع منه:\n' : 'Select bank:\n';
-            banks.forEach((b, i) => { msg += `${i+1}. ${b.label}\n`; });
+            const banks = ['الأهلي (الهفوف)', 'الأهلي (المبرز)', 'الفرنسي', 'الإنماء'];
+            let msg = 'اختر البنك الذي دُفع منه:\n';
+            banks.forEach((b, i) => { msg += `${i+1}. ${b}\n`; });
             const bankChoice = prompt(msg, '1');
             const idx = parseInt(bankChoice) - 1;
             if (isNaN(idx) || idx < 0 || idx >= banks.length) {
-                alert(currentLang === 'ar' ? 'تم إلغاء الدفع' : 'Payment cancelled');
+                alert('تم إلغاء الدفع');
                 return;
             }
-            const selectedBank = banks[idx].value;
+            const selectedBank = banks[idx];
 
-            invoice.paid = true;
-            invoice.payBank = selectedBank;
-            invoice.payDate = getToday();
-
-            refreshAll();
-            const msgSuccess = currentLang === 'ar' ? `✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}` : `✅ Invoice paid from ${selectedBank}`;
-            alert(msgSuccess);
-        }
-
-        // ============================================================
-        //  التقارير
-        // ============================================================
-        function generateReport() {
-            const dateFrom = document.getElementById('reportDateFrom').value;
-            const dateTo = document.getElementById('reportDateTo').value;
-            const supplierFilter = document.getElementById('reportSupplierFilter').value;
-
-            let filtered = data.invoices.filter(inv => inv.paid === true);
-
-            if (dateFrom) filtered = filtered.filter(inv => inv.payDate && inv.payDate >= dateFrom);
-            if (dateTo) filtered = filtered.filter(inv => inv.payDate && inv.payDate <= dateTo);
-            if (supplierFilter) filtered = filtered.filter(inv => inv.company === supplierFilter);
-
-            const tbody = document.getElementById('reportBody');
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
-            } else {
-                tbody.innerHTML = filtered.map((inv, idx) => {
-                    const dateAdded = formatDate(inv.date, currentLang);
-                    const datePaid = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
-                    return `<tr><td>${idx+1}</td><td>${inv.company}</td><td>${inv.amount.toFixed(2)}</td><td>${dateAdded}</td><td>${datePaid}</td><td><span class="badge-paid">${LANG[currentLang].paid}</span></td><td>${inv.payBank || '-'}</td></tr>`;
-                }).join('');
-            }
-
-            const total = filtered.reduce((sum, inv) => sum + inv.amount, 0);
-            document.getElementById('statCount').innerText = filtered.length;
-            document.getElementById('statTotal').innerText = total.toFixed(2);
-            document.getElementById('statPaid').innerText = total.toFixed(2);
-            document.getElementById('statUnpaid').innerText = '0.00';
-        }
-
-        function exportReportCSV() {
-            const rows = document.querySelectorAll('#reportBody tr');
-            if (rows.length === 0 || rows[0].classList.contains('empty-msg')) {
-                alert(currentLang === 'ar' ? 'لا توجد بيانات لتصديرها' : 'No data to export');
-                return;
-            }
-            const headers = currentLang === 'ar' ? 'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع' : 'Company,Amount,Added Date,Payment Date,Bank';
-            let csv = headers + '\n';
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('td');
-                if (cols.length >= 7) csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${currentLang === 'ar' ? 'تقرير_المدفوعات' : 'Payment_Report'}_${getToday()}.csv`;
-            link.click();
-        }
-
-        // ============================================================
-        //  نظام التسعيرات (Pricing System) - الحل الجذري
-        // ============================================================
-        
-        // دالة معالجة الإدخال في الخلية القابلة للتحرير
-        function handlePriceCellInput(cell) {
-            let text = cell.innerText;
-            text = text.replace(/[^0-9.]/g, '');
-            const parts = text.split('.');
-            if (parts.length > 2) {
-                text = parts[0] + '.' + parts.slice(1).join('');
-            }
-            cell.innerText = text;
-        }
-
-        // دالة معالجة فقدان التركيز من الخلية
-        function handlePriceCellBlur(cell) {
-            const productId = cell.dataset.product;
-            const companyId = cell.dataset.company;
-            const key = `${productId}_${companyId}`;
-            const value = cell.innerText.trim();
-            
-            if (value === '') {
-                delete pricing.prices[key];
-            } else {
-                pricing.prices[key] = value;
-            }
-            renderPricingTable();
-        }
-
-        async function loadPricingData() {
             try {
-                const doc = await db.collection('pricingData').doc('main').get();
-                if (doc.exists) {
-                    const pData = doc.data();
-                    pricing.products = pData.products || [];
-                    pricing.companies = pData.companies || [];
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل بيانات التسعير:', error);
-            }
-            renderPricingTable();
-            renderProductsAndCompanies();
-        }
-
-        async function savePricingStructure() {
-            try {
-                await db.collection('pricingData').doc('main').set({
-                    products: pricing.products,
-                    companies: pricing.companies
+                await pbUpdate(COLLECTIONS.pricing, id, {
+                    paid: true,
+                    payBank: selectedBank,
+                    payDate: getToday()
                 });
-                console.log('✅ تم حفظ هيكل التسعيرات');
+                await loadData();
+                alert(`✅ تم دفع الفاتورة بنجاح من بنك ${selectedBank}`);
             } catch (error) {
-                console.error('خطأ في حفظ هيكل التسعيرات:', error);
+                console.error('خطأ في دفع الفاتورة:', error);
+                alert('فشل دفع الفاتورة');
             }
         }
 
-        // عرض المنتجات والشركات مع أزرار حذف
+        // ============================================================
+        //  نظام التسعيرات
+        // ============================================================
         function renderProductsAndCompanies() {
             const productsContainer = document.getElementById('productsList');
             const companiesContainer = document.getElementById('companiesList');
             
-            if (pricing.products.length === 0) {
+            if (products.length === 0) {
                 productsContainer.innerHTML = `<span style="color:#8b949e;">${LANG[currentLang].noProducts}</span>`;
             } else {
-                productsContainer.innerHTML = pricing.products.map(p => `
+                productsContainer.innerHTML = products.map(p => `
                     <span class="inline-flex" style="background:#0d1117;padding:4px 8px;border-radius:12px;border:1px solid #30363d;">
                         ${p.name}
                         <button class="delete-btn" onclick="deleteProduct('${p.id}')">✕</button>
@@ -997,10 +835,10 @@
                 `).join('');
             }
             
-            if (pricing.companies.length === 0) {
+            if (companies.length === 0) {
                 companiesContainer.innerHTML = `<span style="color:#8b949e;">${LANG[currentLang].noCompanies}</span>`;
             } else {
-                companiesContainer.innerHTML = pricing.companies.map(c => `
+                companiesContainer.innerHTML = companies.map(c => `
                     <span class="inline-flex" style="background:#0d1117;padding:4px 8px;border-radius:12px;border:1px solid #30363d;">
                         ${c.name}
                         <button class="delete-btn" onclick="deleteCompany('${c.id}')">✕</button>
@@ -1009,103 +847,89 @@
             }
         }
 
-        // حذف منتج
         async function deleteProduct(id) {
-            if (!confirm(LANG[currentLang].confirmDeleteProduct)) return;
-            pricing.products = pricing.products.filter(p => p.id !== id);
-            Object.keys(pricing.prices).forEach(key => {
-                if (key.startsWith(id + '_')) {
-                    delete pricing.prices[key];
-                }
-            });
-            await savePricingStructure();
-            renderPricingTable();
-            renderProductsAndCompanies();
-            alert(LANG[currentLang].productDeleted);
-        }
-
-        // حذف شركة
-        async function deleteCompany(id) {
-            if (!confirm(LANG[currentLang].confirmDeleteCompany)) return;
-            pricing.companies = pricing.companies.filter(c => c.id !== id);
-            Object.keys(pricing.prices).forEach(key => {
-                if (key.endsWith('_' + id)) {
-                    delete pricing.prices[key];
-                }
-            });
-            await savePricingStructure();
-            renderPricingTable();
-            renderProductsAndCompanies();
-            alert(LANG[currentLang].companyDeleted);
-        }
-
-        function addNewProduct() {
-            const name = prompt(currentLang === 'ar' ? 'أدخل اسم المنتج الجديد (مثال: مواسير نحاس 1/2):' : 'Enter new product name (e.g., Copper Pipe 1/2):');
-            if (name && name.trim()) {
-                const newProduct = { id: crypto.randomUUID(), name: name.trim() };
-                pricing.products.push(newProduct);
-                renderPricingTable();
-                renderProductsAndCompanies();
-                savePricingStructure();
+            if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+            try {
+                await pbDelete(COLLECTIONS.products, id);
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في حذف المنتج:', error);
+                alert('فشل حذف المنتج');
             }
         }
 
-        function addNewCompany() {
+        async function deleteCompany(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الشركة؟')) return;
+            try {
+                await pbDelete(COLLECTIONS.companies, id);
+                await loadData();
+            } catch (error) {
+                console.error('خطأ في حذف الشركة:', error);
+                alert('فشل حذف الشركة');
+            }
+        }
+
+        async function addNewProduct() {
+            const name = prompt(currentLang === 'ar' ? 'أدخل اسم المنتج الجديد:' : 'Enter new product name:');
+            if (name && name.trim()) {
+                try {
+                    await pbCreate(COLLECTIONS.products, { name: name.trim() });
+                    await loadData();
+                } catch (error) {
+                    console.error('خطأ في إضافة المنتج:', error);
+                    alert('فشل إضافة المنتج');
+                }
+            }
+        }
+
+        async function addNewCompany() {
             const name = prompt(currentLang === 'ar' ? 'أدخل اسم الشركة الجديدة:' : 'Enter new company name:');
             if (name && name.trim()) {
-                const newCompany = { id: crypto.randomUUID(), name: name.trim() };
-                pricing.companies.push(newCompany);
-                renderPricingTable();
-                renderProductsAndCompanies();
-                savePricingStructure();
+                try {
+                    await pbCreate(COLLECTIONS.companies, { name: name.trim() });
+                    await loadData();
+                } catch (error) {
+                    console.error('خطأ في إضافة الشركة:', error);
+                    alert('فشل إضافة الشركة');
+                }
             }
         }
 
-        // ============================================================
-        //  عرض جدول التسعيرات (مع الحل الجذري)
-        // ============================================================
         function renderPricingTable() {
             const thead = document.getElementById('pricingHead');
             const tbody = document.getElementById('pricingBody');
 
-            let headerRow = '<tr><th>#</th><th id="thProduct">' + LANG[currentLang].thProduct + '</th>';
-            pricing.companies.forEach((company) => {
+            // بناء رأس الجدول
+            let headerRow = '<tr><th>#</th><th>' + LANG[currentLang].thProduct + '</th>';
+            companies.forEach((company) => {
                 headerRow += `<th>${company.name}</th>`;
             });
-            headerRow += '<th id="thBestPrice">' + LANG[currentLang].thBestPrice + '</th></tr>';
+            headerRow += '<th>' + LANG[currentLang].thBestPrice + '</th></tr>';
             thead.innerHTML = headerRow;
 
-            if (pricing.products.length === 0 || pricing.companies.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${pricing.companies.length + 3}" class="empty-msg">${LANG[currentLang].emptyPricingMsg}</td></tr>`;
+            if (products.length === 0 || companies.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${companies.length + 3}" class="empty-msg">${LANG[currentLang].emptyPricingMsg}</td></tr>`;
                 return;
             }
 
             let bodyHtml = '';
-            pricing.products.forEach((product, pIdx) => {
+            products.forEach((product, pIdx) => {
                 let row = `<tr><td>${pIdx + 1}</td><td>${product.name}</td>`;
                 let bestPrice = Infinity;
                 let bestCompany = '';
 
-                pricing.companies.forEach((company) => {
-                    const priceKey = `${product.id}_${company.id}`;
-                    const price = pricing.prices[priceKey] || '';
+                companies.forEach((company) => {
+                    // البحث عن تسعيرة لهذا المنتج والشركة
+                    const priceEntry = pricing.find(p => 
+                        p.product === product.id && p.company === company.id
+                    );
+                    const price = priceEntry ? priceEntry.price : '';
                     const priceNum = parseFloat(price);
                     if (!isNaN(priceNum) && priceNum < bestPrice) {
                         bestPrice = priceNum;
                         bestCompany = company.name;
                     }
-                    
-                    row += `<td>
-                        <div class="price-cell" 
-                             contenteditable="true" 
-                             data-product="${product.id}" 
-                             data-company="${company.id}"
-                             inputmode="decimal"
-                             onfocus="this.innerText = this.innerText.trim();"
-                             oninput="handlePriceCellInput(this)"
-                             onblur="handlePriceCellBlur(this)"
-                        >${price}</div>
-                    </td>`;
+                    row += `<td>${price || '-'}</td>`;
                 });
 
                 const bestDisplay = (bestPrice !== Infinity) ? `${bestPrice.toFixed(2)} (${bestCompany})` : '-';
@@ -1116,137 +940,168 @@
             tbody.innerHTML = bodyHtml;
         }
 
-        // ============================================================
-        //  حفظ التسعيرة مع اسم وتاريخ
-        // ============================================================
+        // حفظ التسعيرة (تسجيلها كفاتورة)
         async function saveCurrentPricing() {
-            if (Object.keys(pricing.prices).length === 0) {
-                alert(currentLang === 'ar' ? 'لا توجد أسعار لحفظها' : 'No prices to save');
+            // نأخذ أول منتج وشركة ونحولها إلى فاتورة
+            if (products.length === 0 || companies.length === 0) {
+                alert('لا توجد منتجات أو شركات لحفظها');
                 return;
             }
 
-            const pricingName = prompt(
-                currentLang === 'ar' 
-                    ? 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):' 
-                    : 'Enter pricing name (e.g., Copper Pricing - August 2026):'
-            );
-            if (!pricingName || pricingName.trim() === '') {
-                alert(currentLang === 'ar' ? 'الرجاء إدخال اسم للتسعيرة' : 'Please enter a name for the pricing');
+            const product = products[0];
+            const company = companies[0];
+            const price = prompt('أدخل السعر للحفظ:');
+            if (!price || isNaN(parseFloat(price))) {
+                alert('الرجاء إدخال سعر صحيح');
                 return;
             }
-
-            const pricingEntries = Object.entries(pricing.prices).map(([key, price]) => {
-                const [productId, companyId] = key.split('_');
-                return { productId, companyId, price: parseFloat(price) };
-            });
 
             try {
-                await db.collection('pricingArchive').add({
-                    name: pricingName.trim(),
-                    date: new Date().toISOString(),
-                    prices: pricingEntries,
-                    products: pricing.products,
-                    companies: pricing.companies
+                await pbCreate(COLLECTIONS.pricing, {
+                    product: product.id,
+                    company: company.id,
+                    price: parseFloat(price),
+                    date: getToday(),
+                    paid: false,
+                    payBank: '',
+                    payDate: ''
                 });
-                alert('✅ ' + (currentLang === 'ar' ? 'تم حفظ التسعيرة في الأرشيف بنجاح' : 'Pricing saved to archive successfully'));
+                await loadData();
+                alert('✅ تم حفظ التسعيرة بنجاح');
             } catch (error) {
                 console.error('خطأ في حفظ التسعيرة:', error);
-                alert('❌ ' + (currentLang === 'ar' ? 'فشل حفظ التسعيرة' : 'Failed to save pricing'));
+                alert('فشل حفظ التسعيرة');
             }
         }
 
-        // ============================================================
-        //  عرض الأرشيف مع الأسماء والتواريخ
-        // ============================================================
         async function viewArchive() {
             try {
-                const snapshot = await db.collection('pricingArchive').orderBy('date', 'desc').get();
-                if (snapshot.empty) {
-                    alert(currentLang === 'ar' ? 'لا توجد تسعيرات محفوظة في الأرشيف' : 'No pricing records in archive');
+                const data = await pbGet(COLLECTIONS.pricing);
+                const items = data.items || [];
+                if (items.length === 0) {
+                    alert('لا توجد تسعيرات محفوظة');
                     return;
                 }
-
-                let message = (currentLang === 'ar' ? '📋 أرشيف التسعيرات:\n\n' : '📋 Pricing Archive:\n\n');
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = new Date(data.date).toLocaleDateString(
-                        currentLang === 'ar' ? 'ar-EG' : 'en-US', 
-                        { year: 'numeric', month: 'long', day: 'numeric' }
-                    );
-                    const name = data.name || (currentLang === 'ar' ? 'بدون اسم' : 'Unnamed');
-                    message += `📌 ${name}\n📅 ${date}\n`;
-                    data.prices.forEach(p => {
-                        const product = data.products.find(pr => pr.id === p.productId);
-                        const company = data.companies.find(c => c.id === p.companyId);
-                        message += `   ${product ? product.name : 'غير معروف'} - ${company ? company.name : 'غير معروف'}: ${p.price} ريال\n`;
-                    });
-                    message += '\n';
+                let message = '📋 أرشيف التسعيرات:\n\n';
+                items.forEach((item, idx) => {
+                    const product = products.find(p => p.id === item.product);
+                    const company = companies.find(c => c.id === item.company);
+                    const date = item.date || item.created || 'تاريخ غير معروف';
+                    message += `${idx+1}. ${product?.name || 'غير معروف'} - ${company?.name || 'غير معروف'}: ${item.price} ريال (${date})\n`;
                 });
                 alert(message);
             } catch (error) {
-                console.error('خطأ في تحميل الأرشيف:', error);
-                alert('❌ ' + (currentLang === 'ar' ? 'فشل تحميل الأرشيف' : 'Failed to load archive'));
+                console.error('خطأ في عرض الأرشيف:', error);
+                alert('فشل عرض الأرشيف');
             }
         }
 
         function tempCompare() {
-            if (Object.keys(pricing.prices).length === 0) {
-                alert(currentLang === 'ar' ? 'لا توجد أسعار للمقارنة. أدخل بعض الأسعار أولاً.' : 'No prices to compare. Enter some prices first.');
-                return;
-            }
-            alert('✅ ' + (currentLang === 'ar' ? 'تم التحديث. يمكنك رؤية أقل سعر لكل منتج في الجدول.' : 'Updated. You can see the best price for each product in the table.'));
             renderPricingTable();
+            alert('✅ تم تحديث المقارنة');
         }
 
         // ============================================================
         //  الأرصدة
         // ============================================================
         document.getElementById('balAhliHufuf').addEventListener('input', function() {
-            data.balances.ahliHufuf = parseFloat(this.value) || 0;
-            refreshAll();
+            balances.ahliHufuf = parseFloat(this.value) || 0;
+            saveBalances();
+            renderBalances();
         });
         document.getElementById('balAhliMubarraz').addEventListener('input', function() {
-            data.balances.ahliMubarraz = parseFloat(this.value) || 0;
-            refreshAll();
+            balances.ahliMubarraz = parseFloat(this.value) || 0;
+            saveBalances();
+            renderBalances();
         });
         document.getElementById('balFaransi').addEventListener('input', function() {
-            data.balances.faransi = parseFloat(this.value) || 0;
-            refreshAll();
+            balances.faransi = parseFloat(this.value) || 0;
+            saveBalances();
+            renderBalances();
         });
         document.getElementById('balInma').addEventListener('input', function() {
-            data.balances.inma = parseFloat(this.value) || 0;
-            refreshAll();
+            balances.inma = parseFloat(this.value) || 0;
+            saveBalances();
+            renderBalances();
         });
 
         // ============================================================
-        //  أحداث التقارير واللغة والتنقل
+        //  التقارير
         // ============================================================
-        document.getElementById('applyReportBtn').addEventListener('click', generateReport);
-        document.getElementById('resetReportBtn').addEventListener('click', function() {
-            document.getElementById('reportDateFrom').value = '';
-            document.getElementById('reportDateTo').value = '';
-            document.getElementById('reportSupplierFilter').value = '';
-            generateReport();
-        });
-        document.getElementById('exportReportBtn').addEventListener('click', exportReportCSV);
+        function generateReport() {
+            const dateFrom = document.getElementById('reportDateFrom').value;
+            const dateTo = document.getElementById('reportDateTo').value;
+            const supplierFilter = document.getElementById('reportSupplierFilter').value;
 
-        // ============================================================
-        //  أحداث التسعيرات
-        // ============================================================
-        document.getElementById('addProductBtn').addEventListener('click', addNewProduct);
-        document.getElementById('addCompanyBtn').addEventListener('click', addNewCompany);
-        document.getElementById('savePricingBtn').addEventListener('click', saveCurrentPricing);
-        document.getElementById('tempPricingBtn').addEventListener('click', tempCompare);
-        document.getElementById('viewArchiveBtn').addEventListener('click', viewArchive);
+            let filtered = invoices.filter(inv => inv.paid === true);
+
+            if (dateFrom) {
+                filtered = filtered.filter(inv => inv.payDate && inv.payDate >= dateFrom);
+            }
+            if (dateTo) {
+                filtered = filtered.filter(inv => inv.payDate && inv.payDate <= dateTo);
+            }
+            if (supplierFilter) {
+                filtered = filtered.filter(inv => {
+                    const company = companies.find(c => c.id === inv.company);
+                    return company?.name === supplierFilter;
+                });
+            }
+
+            const tbody = document.getElementById('reportBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-msg">${LANG[currentLang].emptyReports}</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map((inv, idx) => {
+                    const company = companies.find(c => c.id === inv.company);
+                    const dateAdded = formatDate(inv.date || inv.created || getToday(), currentLang);
+                    const datePaid = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
+                    return `<tr><td>${idx+1}</td><td>${company?.name || 'غير معروف'}</td><td>${(inv.price || 0).toFixed(2)}</td><td>${dateAdded}</td><td>${datePaid}</td><td><span class="badge-paid">${LANG[currentLang].paid}</span></td><td>${inv.payBank || '-'}</td></tr>`;
+                }).join('');
+            }
+
+            const total = filtered.reduce((sum, inv) => sum + (inv.price || 0), 0);
+            document.getElementById('statCount').innerText = filtered.length;
+            document.getElementById('statTotal').innerText = total.toFixed(2);
+            document.getElementById('statPaid').innerText = total.toFixed(2);
+            document.getElementById('statUnpaid').innerText = '0.00';
+        }
+
+        function exportReportCSV() {
+            const rows = document.querySelectorAll('#reportBody tr');
+            if (rows.length === 0 || rows[0].classList.contains('empty-msg')) {
+                alert('لا توجد بيانات لتصديرها');
+                return;
+            }
+            const headers = 'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع';
+            let csv = headers + '\n';
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                if (cols.length >= 7) {
+                    csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText}\n`;
+                }
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `تقرير_المدفوعات_${getToday()}.csv`;
+            link.click();
+        }
 
         // ============================================================
         //  اللغة
         // ============================================================
+        function setSyncStatus(text, type = 'loading') {
+            const el = document.getElementById('syncStatus');
+            el.innerText = text;
+            el.className = 'sync-status';
+            if (type === 'saved') el.classList.add('saved');
+            if (type === 'error') el.classList.add('error');
+        }
+
         function applyLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
-            
-            // تحديث جميع النصوص
             document.getElementById('brandSub').innerText = t.brandSub;
             document.getElementById('tab0').innerText = t.tab0;
             document.getElementById('tab1').innerText = t.tab1;
@@ -1255,35 +1110,11 @@
             document.getElementById('tab4').innerText = t.tab4;
             document.getElementById('tab5').innerText = t.tab5;
             document.getElementById('titleDashboard').innerText = t.titleDashboard;
-            document.getElementById('dashUnpaidLabel').innerText = t.dashUnpaidLabel;
-            document.getElementById('dashUnpaidTotalLabel').innerText = t.dashUnpaidTotalLabel;
-            document.getElementById('dashPaidTodayLabel').innerText = t.dashPaidTodayLabel;
-            document.getElementById('dashTotalBalanceLabel').innerText = t.dashTotalBalanceLabel;
-            document.getElementById('dashRecentTitle').innerText = t.dashRecentTitle;
             document.getElementById('titleSuppliers').innerText = t.titleSuppliers;
             document.getElementById('titleBalances').innerText = t.titleBalances;
             document.getElementById('titleInvoices').innerText = t.titleInvoices;
             document.getElementById('titleReports').innerText = t.titleReports;
             document.getElementById('titlePricing').innerText = t.titlePricing;
-            document.getElementById('thNameAr').innerText = t.thNameAr;
-            document.getElementById('thNameEn').innerText = t.thNameEn;
-            document.getElementById('thBank').innerText = t.thBank;
-            document.getElementById('thIban').innerText = t.thIban;
-            document.getElementById('thAction').innerText = t.thAction;
-            document.getElementById('thCompany').innerText = t.thCompany;
-            document.getElementById('thAmount').innerText = t.thAmount;
-            document.getElementById('thDate').innerText = t.thDate;
-            document.getElementById('thStatus').innerText = t.thStatus;
-            document.getElementById('thPayBank').innerText = t.thPayBank;
-            document.getElementById('thAction2').innerText = t.thAction2;
-            
-            // أزرار التسعيرات
-            document.getElementById('addProductBtn').innerHTML = t.addProduct;
-            document.getElementById('addCompanyBtn').innerHTML = t.addCompany;
-            document.getElementById('savePricingBtn').innerHTML = t.savePricing;
-            document.getElementById('tempPricingBtn').innerHTML = t.compareOnly;
-            document.getElementById('viewArchiveBtn').innerHTML = t.viewArchive;
-            
             document.getElementById('addSupplierBtn').innerHTML = t.addSupplier;
             document.getElementById('addInvoiceBtn').innerHTML = t.addInvoice;
             document.getElementById('exportReportBtn').innerHTML = t.exportBtn;
@@ -1293,47 +1124,11 @@
             document.getElementById('supplierIban').placeholder = t.placeholderIban;
             document.getElementById('invoiceCompanyNew').placeholder = t.placeholderCompanyNew;
             document.getElementById('invoiceAmount').placeholder = t.placeholderAmount;
-            document.getElementById('lblDateFrom').innerHTML = `${t.lblDateFrom} <input type="date" id="reportDateFrom" />`;
-            document.getElementById('lblDateTo').innerHTML = `${t.lblDateTo} <input type="date" id="reportDateTo" />`;
-            document.getElementById('statCountLabel').innerText = t.statCount;
-            document.getElementById('statTotalLabel').innerText = t.statTotal;
-            document.getElementById('statPaidLabel').innerText = t.statPaid;
-            document.getElementById('statUnpaidLabel').innerText = t.statUnpaid;
-            document.getElementById('repCompany').innerText = t.repCompany;
-            document.getElementById('repAmount').innerText = t.repAmount;
-            document.getElementById('repDateAdded').innerText = t.repDateAdded;
-            document.getElementById('repDatePaid').innerText = t.repDatePaid;
-            document.getElementById('repStatus').innerText = t.repStatus;
-            document.getElementById('repBank').innerText = t.repBank;
-            document.getElementById('invoiceHint').innerText = t.invoiceHint;
-            document.getElementById('balanceNote').innerText = t.balanceNote;
-            document.getElementById('lblAhliHufuf').innerHTML = t.lblAhliHufuf;
-            document.getElementById('lblAhliMubarraz').innerHTML = t.lblAhliMubarraz;
-            document.getElementById('lblFaransi').innerHTML = t.lblFaransi;
-            document.getElementById('lblInma').innerHTML = t.lblInma;
-            document.getElementById('emptyPricingMsg').innerText = t.emptyPricingMsg;
-            document.getElementById('productsListLabel').innerText = t.productsListLabel;
-            document.getElementById('companiesListLabel').innerText = t.companiesListLabel;
-
-            document.getElementById('balAhliHufuf').addEventListener('input', function() {
-                data.balances.ahliHufuf = parseFloat(this.value) || 0;
-                refreshAll();
-            });
-            document.getElementById('balAhliMubarraz').addEventListener('input', function() {
-                data.balances.ahliMubarraz = parseFloat(this.value) || 0;
-                refreshAll();
-            });
-            document.getElementById('balFaransi').addEventListener('input', function() {
-                data.balances.faransi = parseFloat(this.value) || 0;
-                refreshAll();
-            });
-            document.getElementById('balInma').addEventListener('input', function() {
-                data.balances.inma = parseFloat(this.value) || 0;
-                refreshAll();
-            });
-
-            updateSupplierDropdowns();
-            updateLiveDate();
+            document.getElementById('addProductBtn').innerHTML = t.addProduct;
+            document.getElementById('addCompanyBtn').innerHTML = t.addCompany;
+            document.getElementById('savePricingBtn').innerHTML = t.savePricing;
+            document.getElementById('tempPricingBtn').innerHTML = t.compareOnly;
+            document.getElementById('viewArchiveBtn').innerHTML = t.viewArchive;
             refreshAll();
             setTimeout(generateReport, 300);
         }
@@ -1346,18 +1141,24 @@
             applyLanguage(newLang);
         });
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(this.dataset.page).classList.add('active');
-                if (this.dataset.page === 'page4') generateReport();
-            });
-        });
-
+        // ============================================================
+        //  أحداث الأزرار
+        // ============================================================
         document.getElementById('addSupplierBtn').addEventListener('click', addSupplier);
         document.getElementById('addInvoiceBtn').addEventListener('click', addInvoice);
+        document.getElementById('addProductBtn').addEventListener('click', addNewProduct);
+        document.getElementById('addCompanyBtn').addEventListener('click', addNewCompany);
+        document.getElementById('savePricingBtn').addEventListener('click', saveCurrentPricing);
+        document.getElementById('tempPricingBtn').addEventListener('click', tempCompare);
+        document.getElementById('viewArchiveBtn').addEventListener('click', viewArchive);
+        document.getElementById('applyReportBtn').addEventListener('click', generateReport);
+        document.getElementById('resetReportBtn').addEventListener('click', function() {
+            document.getElementById('reportDateFrom').value = '';
+            document.getElementById('reportDateTo').value = '';
+            document.getElementById('reportSupplierFilter').value = '';
+            generateReport();
+        });
+        document.getElementById('exportReportBtn').addEventListener('click', exportReportCSV);
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -1371,45 +1172,34 @@
             if (this.value) document.getElementById('invoiceCompanyNew').value = this.value;
         });
 
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(this.dataset.page).classList.add('active');
+                if (this.dataset.page === 'page4') generateReport();
+            });
+        });
+
         // ============================================================
         //  التهيئة
         // ============================================================
-        (async function init() {
-            await loadFromCloud();
-            await loadPricingData();
+        async function init() {
+            setSyncStatus(LANG[currentLang].syncLoading, 'loading');
+            await loadData();
             applyLanguage('ar');
             const today = getToday();
             const lastMonth = new Date();
             lastMonth.setDate(lastMonth.getDate() - 30);
             document.getElementById('reportDateFrom').value = lastMonth.toISOString().slice(0,10);
             document.getElementById('reportDateTo').value = today;
-
-            db.collection('appData').doc('mainData').onSnapshot((doc) => {
-                if (doc.exists) {
-                    const cloudData = doc.data();
-                    if (cloudData) {
-                        const newStr = JSON.stringify(cloudData);
-                        if (newStr !== JSON.stringify(data)) {
-                            data = cloudData;
-                            if (!data.balances) data.balances = { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 };
-                            if (!data.invoices) data.invoices = [];
-                            data.invoices.forEach(inv => {
-                                if (!inv.date) inv.date = getToday();
-                                if (inv.paid === undefined) inv.paid = false;
-                                if (!inv.payBank) inv.payBank = '';
-                                if (!inv.payDate) inv.payDate = '';
-                            });
-                            refreshAll();
-                            setSyncStatus(LANG[currentLang].syncUpdated, 'saved');
-                        }
-                    }
-                }
-            });
             setTimeout(generateReport, 500);
             setInterval(updateLiveDate, 60000);
-        })();
+        }
 
-        console.log('✅ النظام جاهز مع الترجمة الكاملة وبيانات Firebase الصحيحة');
+        init();
+        console.log('✅ النظام جاهز مع PocketBase');
     </script>
 </body>
 </html>
