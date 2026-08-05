@@ -73,34 +73,34 @@
         .recent-list .date { color: #8b949e; font-size: 13px; }
         .pricing-table-wrap { overflow-x: auto; }
         .pricing-table-wrap table { min-width: 600px; }
-        .price-cell { display: inline-block; width: 100%; min-width: 60px; min-height: 32px; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 4px 8px; text-align: center; font-size: 16px; font-family: 'Segoe UI', Tahoma, sans-serif; cursor: text; outline: none; }
-        .price-cell:focus { border-color: #1f6feb; box-shadow: 0 0 0 2px #1f6feb44; }
-        .price-cell.empty { color: #8b949e; }
+        .price-cell { 
+            display: inline-block; 
+            width: 100%; 
+            min-width: 60px; 
+            min-height: 34px; 
+            background: #0d1117; 
+            color: #e6edf3; 
+            border: 1px solid #30363d; 
+            border-radius: 4px; 
+            padding: 4px 8px; 
+            text-align: center; 
+            font-size: 16px; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            cursor: text;
+            outline: none;
+            line-height: 1.5;
+        }
+        .price-cell:focus { 
+            border-color: #1f6feb; 
+            box-shadow: 0 0 0 2px #1f6feb44; 
+        }
+        .price-cell.empty { 
+            color: #8b949e; 
+        }
         .best-price { font-weight: bold; color: #f0883e; }
         .delete-btn { background: #da3633; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
         .delete-btn:hover { background: #f85149; }
         .inline-flex { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .price-input {
-            width:100%;
-            background:#0d1117;
-            color:#e6edf3;
-            border:1px solid #30363d;
-            border-radius:4px;
-            padding:4px;
-            text-align:center;
-            font-size:16px;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        .price-input::-webkit-inner-spin-button,
-        .price-input::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .price-input:focus {
-            border-color: #1f6feb;
-            box-shadow: 0 0 0 2px #1f6feb44;
-        }
     </style>
 </head>
 <body>
@@ -901,32 +901,34 @@
         }
 
         // ============================================================
-        //  نظام التسعيرات (Pricing System)
+        //  نظام التسعيرات (Pricing System) - الحل الجذري
         // ============================================================
         
-        // دالة معالجة الإدخال الرقمي (الحل الجذري)
-        function handlePriceInput(inputElement) {
-            const productId = inputElement.dataset.product;
-            const companyId = inputElement.dataset.company;
-            const key = `${productId}_${companyId}`;
-            let value = inputElement.value;
-            
-            // تنظيف الإدخال: إزالة أي شيء غير أرقام أو نقطة
-            value = value.replace(/[^0-9.]/g, '');
+        // دالة معالجة الإدخال في الخلية القابلة للتحرير
+        function handlePriceCellInput(cell) {
+            // السماح فقط بالأرقام والنقطة
+            let text = cell.innerText;
+            text = text.replace(/[^0-9.]/g, '');
             // منع النقاط المتكررة
-            const parts = value.split('.');
+            const parts = text.split('.');
             if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
+                text = parts[0] + '.' + parts.slice(1).join('');
             }
-            inputElement.value = value;
+            cell.innerText = text;
+        }
+
+        // دالة معالجة فقدان التركيز من الخلية
+        function handlePriceCellBlur(cell) {
+            const productId = cell.dataset.product;
+            const companyId = cell.dataset.company;
+            const key = `${productId}_${companyId}`;
+            const value = cell.innerText.trim();
             
             if (value === '') {
                 delete pricing.prices[key];
             } else {
                 pricing.prices[key] = value;
             }
-            
-            // إعادة رسم الجدول لتحديث أقل سعر
             renderPricingTable();
         }
 
@@ -1072,20 +1074,17 @@
                         bestCompany = company.name;
                     }
                     
-                    // الحل الجذري: إجبار الاتجاه على LTR عند الكتابة
+                    // استخدام div قابل للتحرير بدلاً من input (الحل الجذري)
                     row += `<td>
-                        <input type="number" 
-                               step="0.01" 
-                               class="price-input" 
-                               data-product="${product.id}" 
-                               data-company="${company.id}" 
-                               value="${price}" 
-                               placeholder="-" 
-                               style="width:100%; background:#0d1117; color:#e6edf3; border:1px solid #30363d; border-radius:4px; padding:4px; text-align:center; font-size:16px;"
-                               onfocus="this.style.direction = 'ltr'; this.setSelectionRange(0, this.value.length);"
-                               onblur="this.style.direction = '';"
-                               oninput="handlePriceInput(this)"
-                        />
+                        <div class="price-cell" 
+                             contenteditable="true" 
+                             data-product="${product.id}" 
+                             data-company="${company.id}"
+                             inputmode="decimal"
+                             onfocus="this.innerText = this.innerText.trim();"
+                             oninput="handlePriceCellInput(this)"
+                             onblur="handlePriceCellBlur(this)"
+                        >${price}</div>
                     </td>`;
                 });
 
@@ -1380,7 +1379,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع الحل الجذري لكتابة الأرقام');
+        console.log('✅ النظام جاهز مع الحل الجذري (contenteditable)');
     </script>
 </body>
 </html>
