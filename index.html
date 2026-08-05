@@ -73,7 +73,7 @@
         .recent-list .date { color: #8b949e; font-size: 13px; }
         .pricing-table-wrap { overflow-x: auto; }
         .pricing-table-wrap table { min-width: 600px; }
-        .pricing-table-wrap input[type="tel"] { width: 100%; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 6px; text-align: center; font-size: 16px; }
+        .pricing-table-wrap input[type="text"] { width: 100%; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 6px; text-align: center; font-size: 16px; }
         .best-price { font-weight: bold; color: #f0883e; }
         .delete-btn { background: #da3633; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
         .delete-btn:hover { background: #f85149; }
@@ -1024,8 +1024,8 @@
                         bestPrice = priceNum;
                         bestCompany = company.name;
                     }
-                    // استخدم type="tel" لحل مشكلة كتابة الأرقام الطويلة
-                    row += `<td><input type="tel" inputmode="numeric" class="price-input" data-product="${product.id}" data-company="${company.id}" value="${price}" placeholder="-" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;text-align:center;font-size:16px;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" /></td>`;
+                    // الحل النهائي: type="text" مع onfocus و oninput و onkeydown
+                    row += `<td><input type="text" class="price-input" data-product="${product.id}" data-company="${company.id}" value="${price}" placeholder="-" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;text-align:center;font-size:16px;" onfocus="this.selectionStart = this.selectionEnd = this.value.length;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" onkeydown="if (event.key === 'Enter') { event.preventDefault(); this.blur(); }" /></td>`;
                 });
 
                 const bestDisplay = (bestPrice !== Infinity) ? `${bestPrice.toFixed(2)} (${bestCompany})` : '-';
@@ -1336,7 +1336,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع إصلاح كتابة الأرقام الطويلة (type="tel")');
+        console.log('✅ النظام جاهز مع الحل النهائي لكتابة الأرقام الطويلة');
     </script>
 </body>
 </html>
