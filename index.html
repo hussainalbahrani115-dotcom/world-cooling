@@ -305,7 +305,7 @@
         }
 
         // ============================================================
-        //  الترجمة
+        //  الترجمة الكاملة (مع إضافة نصوص التسعيرات)
         // ============================================================
         const LANG = {
             ar: {
@@ -391,7 +391,23 @@
                 lblAhliHufuf: '🇸🇦 الأهلي (الهفوف)',
                 lblAhliMubarraz: '🇸🇦 الأهلي (المبرز)',
                 lblFaransi: '🇫🇷 الفرنسي',
-                lblInma: '🇸🇦 الإنماء'
+                lblInma: '🇸🇦 الإنماء',
+                // نصوص نظام التسعيرات
+                addProduct: '➕ إضافة منتج',
+                addCompany: '➕ إضافة شركة',
+                savePricing: '💾 حفظ التسعيرة',
+                tempCompare: '🔄 مقارنة فقط',
+                viewArchive: '📋 عرض الأرشيف',
+                pricingNamePrompt: 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):',
+                pricingNameRequired: 'الرجاء إدخال اسم للتسعيرة',
+                pricingSaved: 'تم حفظ التسعيرة في الأرشيف بنجاح',
+                pricingSaveFailed: 'فشل حفظ التسعيرة',
+                noPricesToSave: 'لا توجد أسعار لحفظها',
+                noArchive: 'لا توجد تسعيرات محفوظة في الأرشيف',
+                noPricesToCompare: 'لا توجد أسعار للمقارنة. أدخل بعض الأسعار أولاً.',
+                compareUpdated: 'تم التحديث. يمكنك رؤية أقل سعر لكل منتج في الجدول.',
+                archiveTitle: '📋 أرشيف التسعيرات:\n\n',
+                unnamed: 'بدون اسم'
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
@@ -476,7 +492,23 @@
                 lblAhliHufuf: '🇸🇦 AlAhli (Hufuf)',
                 lblAhliMubarraz: '🇸🇦 AlAhli (Mubarraz)',
                 lblFaransi: '🇫🇷 French Bank',
-                lblInma: '🇸🇦 AlInma'
+                lblInma: '🇸🇦 AlInma',
+                // نصوص نظام التسعيرات
+                addProduct: '➕ Add Product',
+                addCompany: '➕ Add Company',
+                savePricing: '💾 Save Pricing',
+                tempCompare: '🔄 Compare Only',
+                viewArchive: '📋 View Archive',
+                pricingNamePrompt: 'Enter pricing name (e.g., Copper Pricing - August 2026):',
+                pricingNameRequired: 'Please enter a name for the pricing',
+                pricingSaved: 'Pricing saved to archive successfully',
+                pricingSaveFailed: 'Failed to save pricing',
+                noPricesToSave: 'No prices to save',
+                noArchive: 'No pricing records in archive',
+                noPricesToCompare: 'No prices to compare. Enter some prices first.',
+                compareUpdated: 'Updated. You can see the best price for each product in the table.',
+                archiveTitle: '📋 Pricing Archive:\n\n',
+                unnamed: 'Unnamed'
             }
         };
 
@@ -847,7 +879,7 @@
         }
 
         // ============================================================
-        //  نظام التسعيرات (Pricing System)
+        //  نظام التسعيرات (Pricing System) - مع دعم اللغة
         // ============================================================
         async function loadPricingData() {
             try {
@@ -869,10 +901,10 @@
                     products: pricing.products,
                     companies: pricing.companies
                 });
-                alert('✅ تم حفظ هيكل التسعيرات بنجاح');
+                alert('✅ ' + (currentLang === 'ar' ? 'تم حفظ هيكل التسعيرات بنجاح' : 'Pricing structure saved successfully'));
             } catch (error) {
                 console.error('خطأ في حفظ هيكل التسعيرات:', error);
-                alert('❌ فشل الحفظ');
+                alert('❌ ' + (currentLang === 'ar' ? 'فشل الحفظ' : 'Save failed'));
             }
         }
 
@@ -901,11 +933,11 @@
             const tbody = document.getElementById('pricingBody');
 
             // بناء رأس الجدول
-            let headerRow = '<tr><th>#</th><th id="thProduct">' + LANG[currentLang].thProduct + '</th>';
+            let headerRow = '<tr><th>#</th><th>' + LANG[currentLang].thProduct + '</th>';
             pricing.companies.forEach((company) => {
                 headerRow += `<th>${company.name}</th>`;
             });
-            headerRow += '<th id="thBestPrice">' + LANG[currentLang].thBestPrice + '</th></tr>';
+            headerRow += '<th>' + LANG[currentLang].thBestPrice + '</th></tr>';
             thead.innerHTML = headerRow;
 
             // إذا لم توجد منتجات أو شركات
@@ -957,22 +989,17 @@
         }
 
         // ============================================================
-        //  حفظ التسعيرة مع اسم وتاريخ
+        //  حفظ التسعيرة مع اسم وتاريخ (مع دعم اللغة)
         // ============================================================
         async function saveCurrentPricing() {
             if (Object.keys(pricing.prices).length === 0) {
-                alert(currentLang === 'ar' ? 'لا توجد أسعار لحفظها' : 'No prices to save');
+                alert(LANG[currentLang].noPricesToSave);
                 return;
             }
 
-            // طلب اسم التسعيرة
-            const pricingName = prompt(
-                currentLang === 'ar' 
-                    ? 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):' 
-                    : 'Enter pricing name (e.g., Copper Pricing - August 2026):'
-            );
+            const pricingName = prompt(LANG[currentLang].pricingNamePrompt);
             if (!pricingName || pricingName.trim() === '') {
-                alert(currentLang === 'ar' ? 'الرجاء إدخال اسم للتسعيرة' : 'Please enter a name for the pricing');
+                alert(LANG[currentLang].pricingNameRequired);
                 return;
             }
 
@@ -989,32 +1016,32 @@
                     products: pricing.products,
                     companies: pricing.companies
                 });
-                alert('✅ ' + (currentLang === 'ar' ? 'تم حفظ التسعيرة في الأرشيف بنجاح' : 'Pricing saved to archive successfully'));
+                alert('✅ ' + LANG[currentLang].pricingSaved);
             } catch (error) {
                 console.error('خطأ في حفظ التسعيرة:', error);
-                alert('❌ ' + (currentLang === 'ar' ? 'فشل حفظ التسعيرة' : 'Failed to save pricing'));
+                alert('❌ ' + LANG[currentLang].pricingSaveFailed);
             }
         }
 
         // ============================================================
-        //  عرض الأرشيف مع الأسماء والتواريخ
+        //  عرض الأرشيف مع الأسماء والتواريخ (مع دعم اللغة)
         // ============================================================
         async function viewArchive() {
             try {
                 const snapshot = await db.collection('pricingArchive').orderBy('date', 'desc').get();
                 if (snapshot.empty) {
-                    alert(currentLang === 'ar' ? 'لا توجد تسعيرات محفوظة في الأرشيف' : 'No pricing records in archive');
+                    alert(LANG[currentLang].noArchive);
                     return;
                 }
 
-                let message = (currentLang === 'ar' ? '📋 أرشيف التسعيرات:\n\n' : '📋 Pricing Archive:\n\n');
+                let message = LANG[currentLang].archiveTitle;
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const date = new Date(data.date).toLocaleDateString(
                         currentLang === 'ar' ? 'ar-EG' : 'en-US', 
                         { year: 'numeric', month: 'long', day: 'numeric' }
                     );
-                    const name = data.name || (currentLang === 'ar' ? 'بدون اسم' : 'Unnamed');
+                    const name = data.name || LANG[currentLang].unnamed;
                     message += `📌 ${name}\n📅 ${date}\n`;
                     data.prices.forEach(p => {
                         const product = data.products.find(pr => pr.id === p.productId);
@@ -1026,16 +1053,16 @@
                 alert(message);
             } catch (error) {
                 console.error('خطأ في تحميل الأرشيف:', error);
-                alert('❌ ' + (currentLang === 'ar' ? 'فشل تحميل الأرشيف' : 'Failed to load archive'));
+                alert('❌ ' + LANG[currentLang].pricingSaveFailed);
             }
         }
 
         function tempCompare() {
             if (Object.keys(pricing.prices).length === 0) {
-                alert(currentLang === 'ar' ? 'لا توجد أسعار للمقارنة. أدخل بعض الأسعار أولاً.' : 'No prices to compare. Enter some prices first.');
+                alert(LANG[currentLang].noPricesToCompare);
                 return;
             }
-            alert('✅ ' + (currentLang === 'ar' ? 'تم التحديث. يمكنك رؤية أقل سعر لكل منتج في الجدول.' : 'Updated. You can see the best price for each product in the table.'));
+            alert('✅ ' + LANG[currentLang].compareUpdated);
             renderPricingTable();
         }
 
@@ -1144,6 +1171,13 @@
             document.getElementById('lblInma').innerHTML = t.lblInma;
             document.getElementById('emptyPricingMsg').innerText = t.emptyPricingMsg;
 
+            // تحديث نصوص أزرار التسعيرات
+            document.getElementById('addProductBtn').innerText = t.addProduct;
+            document.getElementById('addCompanyBtn').innerText = t.addCompany;
+            document.getElementById('savePricingBtn').innerText = t.savePricing;
+            document.getElementById('tempPricingBtn').innerText = t.tempCompare;
+            document.getElementById('viewArchiveBtn').innerText = t.viewArchive;
+
             document.getElementById('balAhliHufuf').addEventListener('input', function() {
                 data.balances.ahliHufuf = parseFloat(this.value) || 0;
                 refreshAll();
@@ -1238,7 +1272,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع نظام التسعيرات المتكامل (اسم + تاريخ)');
+        console.log('✅ النظام جاهز مع نظام التسعيرات المتكامل (دعم الترجمة الكامل)');
     </script>
 </body>
 </html>
