@@ -73,7 +73,29 @@
         .recent-list .date { color: #8b949e; font-size: 13px; }
         .pricing-table-wrap { overflow-x: auto; }
         .pricing-table-wrap table { min-width: 600px; }
-        .pricing-table-wrap textarea.price-input { width: 100%; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 4px; text-align: center; font-size: 16px; resize: none; overflow: hidden; height: 32px; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .price-cell { 
+            display: inline-block; 
+            width: 100%; 
+            min-width: 60px; 
+            min-height: 32px; 
+            background: #0d1117; 
+            color: #e6edf3; 
+            border: 1px solid #30363d; 
+            border-radius: 4px; 
+            padding: 4px 8px; 
+            text-align: center; 
+            font-size: 16px; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            cursor: text;
+            outline: none;
+        }
+        .price-cell:focus {
+            border-color: #1f6feb;
+            box-shadow: 0 0 0 2px #1f6feb44;
+        }
+        .price-cell.empty {
+            color: #8b949e;
+        }
         .best-price { font-weight: bold; color: #f0883e; }
         .delete-btn { background: #da3633; color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
         .delete-btn:hover { background: #f85149; }
@@ -912,7 +934,6 @@
             const productsContainer = document.getElementById('productsList');
             const companiesContainer = document.getElementById('companiesList');
             
-            // عرض المنتجات
             if (pricing.products.length === 0) {
                 productsContainer.innerHTML = `<span style="color:#8b949e;">${currentLang === 'ar' ? 'لا توجد منتجات' : 'No products'}</span>`;
             } else {
@@ -924,7 +945,6 @@
                 `).join('');
             }
             
-            // عرض الشركات
             if (pricing.companies.length === 0) {
                 companiesContainer.innerHTML = `<span style="color:#8b949e;">${currentLang === 'ar' ? 'لا توجد شركات' : 'No companies'}</span>`;
             } else {
@@ -941,7 +961,6 @@
         async function deleteProduct(id) {
             if (!confirm(LANG[currentLang].confirmDeleteProduct)) return;
             pricing.products = pricing.products.filter(p => p.id !== id);
-            // حذف الأسعار المرتبطة بهذا المنتج
             Object.keys(pricing.prices).forEach(key => {
                 if (key.startsWith(id + '_')) {
                     delete pricing.prices[key];
@@ -957,7 +976,6 @@
         async function deleteCompany(id) {
             if (!confirm(LANG[currentLang].confirmDeleteCompany)) return;
             pricing.companies = pricing.companies.filter(c => c.id !== id);
-            // حذف الأسعار المرتبطة بهذه الشركة
             Object.keys(pricing.prices).forEach(key => {
                 if (key.endsWith('_' + id)) {
                     delete pricing.prices[key];
@@ -991,6 +1009,33 @@
             }
         }
 
+        // ============================================================
+        //  دالة حفظ السعر من الخلية القابلة للتحرير
+        // ============================================================
+        function savePriceFromCell(cell) {
+            const productId = cell.dataset.product;
+            const companyId = cell.dataset.company;
+            let value = cell.innerText.trim();
+            // تنظيف المدخلات
+            value = value.replace(/[^0-9.]/g, '');
+            // منع النقاط المتكررة
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            cell.innerText = value;
+            const key = `${productId}_${companyId}`;
+            if (value === '') {
+                delete pricing.prices[key];
+            } else {
+                pricing.prices[key] = value;
+            }
+            renderPricingTable();
+        }
+
+        // ============================================================
+        //  عرض جدول التسعيرات (مع خلايا قابلة للتحرير)
+        // ============================================================
         function renderPricingTable() {
             const thead = document.getElementById('pricingHead');
             const tbody = document.getElementById('pricingBody');
@@ -1003,13 +1048,11 @@
             headerRow += '<th id="thBestPrice">' + LANG[currentLang].thBestPrice + '</th></tr>';
             thead.innerHTML = headerRow;
 
-            // إذا لم توجد منتجات أو شركات
             if (pricing.products.length === 0 || pricing.companies.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="${pricing.companies.length + 3}" class="empty-msg">${LANG[currentLang].emptyPricingMsg}</td></tr>`;
                 return;
             }
 
-            // بناء الصفوف
             let bodyHtml = '';
             pricing.products.forEach((product, pIdx) => {
                 let row = `<tr><td>${pIdx + 1}</td><td>${product.name}</td>`;
@@ -1024,8 +1067,8 @@
                         bestPrice = priceNum;
                         bestCompany = company.name;
                     }
-                    // استخدام textarea بدلاً من input لحل مشكلة كتابة الأرقام الطويلة في سفاري
-                    row += `<td><textarea class="price-input" data-product="${product.id}" data-company="${company.id}" rows="1" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:4px;text-align:center;font-size:16px;resize:none;overflow:hidden;height:32px;font-family:'Segoe UI',Tahoma,sans-serif;" onfocus="this.select();" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'); this.style.height = '32px';" onkeydown="if (event.key === 'Enter') { event.preventDefault(); this.blur(); }">${price}</textarea></td>`;
+                    // استخدام div قابل للتحرير بدلاً من input
+                    row += `<td><div class="price-cell" contenteditable="true" data-product="${product.id}" data-company="${company.id}" oninput="savePriceFromCell(this)" onfocus="this.innerText = this.innerText.trim();" onblur="savePriceFromCell(this);">${price}</div></td>`;
                 });
 
                 const bestDisplay = (bestPrice !== Infinity) ? `${bestPrice.toFixed(2)} (${bestCompany})` : '-';
@@ -1034,22 +1077,6 @@
             });
 
             tbody.innerHTML = bodyHtml;
-
-            // إضافة مستمعين للأحداث
-            document.querySelectorAll('.price-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    const productId = this.dataset.product;
-                    const companyId = this.dataset.company;
-                    const price = this.value;
-                    const key = `${productId}_${companyId}`;
-                    if (price === '') {
-                        delete pricing.prices[key];
-                    } else {
-                        pricing.prices[key] = price;
-                    }
-                    renderPricingTable();
-                });
-            });
         }
 
         // ============================================================
@@ -1061,7 +1088,6 @@
                 return;
             }
 
-            // طلب اسم التسعيرة
             const pricingName = prompt(
                 currentLang === 'ar' 
                     ? 'أدخل اسم التسعيرة (مثال: تسعيرة النحاس - أغسطس 2026):' 
@@ -1336,7 +1362,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع حل نهائي لكتابة الأرقام الطويلة (textarea)');
+        console.log('✅ النظام جاهز مع الحل الجذري (contenteditable)');
     </script>
 </body>
 </html>
