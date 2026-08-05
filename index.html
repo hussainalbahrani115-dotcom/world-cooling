@@ -242,9 +242,9 @@
 
     <script>
         // ============================================================
-        //  تكوين PocketBase
+        //  تكوين PocketBase - رابط السحابة
         // ============================================================
-        const PB_URL = 'http://127.0.0.1:8090';
+        const PB_URL = 'https://pocketbase-production-c8e4.up.railway.app';
         const COLLECTIONS = {
             products: 'products',
             companies: 'companies',
@@ -255,33 +255,53 @@
         //  دوال مساعدة للتواصل مع PocketBase API
         // ============================================================
         async function pbGet(collection) {
-            const res = await fetch(`${PB_URL}/api/collections/${collection}/records`);
-            return res.json();
+            try {
+                const res = await fetch(`${PB_URL}/api/collections/${collection}/records`);
+                return res.json();
+            } catch (error) {
+                console.error('خطأ في الاتصال:', error);
+                return { items: [] };
+            }
         }
 
         async function pbCreate(collection, data) {
-            const res = await fetch(`${PB_URL}/api/collections/${collection}/records`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            return res.json();
+            try {
+                const res = await fetch(`${PB_URL}/api/collections/${collection}/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return res.json();
+            } catch (error) {
+                console.error('خطأ في الإضافة:', error);
+                throw error;
+            }
         }
 
         async function pbUpdate(collection, id, data) {
-            const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            return res.json();
+            try {
+                const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return res.json();
+            } catch (error) {
+                console.error('خطأ في التحديث:', error);
+                throw error;
+            }
         }
 
         async function pbDelete(collection, id) {
-            const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
-                method: 'DELETE'
-            });
-            return res.json();
+            try {
+                const res = await fetch(`${PB_URL}/api/collections/${collection}/records/${id}`, {
+                    method: 'DELETE'
+                });
+                return res.json();
+            } catch (error) {
+                console.error('خطأ في الحذف:', error);
+                throw error;
+            }
         }
 
         // ============================================================
@@ -1199,7 +1219,7 @@
         }
 
         init();
-        console.log('✅ النظام جاهز مع PocketBase');
+        console.log('✅ النظام جاهز مع PocketBase على السحابة');
     </script>
 </body>
 </html>
