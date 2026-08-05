@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
+        /* نفس الستايل القديم مع إضافات بسيطة */
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
         body { background: #0b0f14; color: #e6edf3; padding: 16px; transition: 0.3s; }
         body.ltr { direction: ltr; text-align: left; }
@@ -60,6 +61,19 @@
         .balance-item label { display: block; font-weight: bold; color: #8b949e; margin-bottom: 5px; }
         .balance-item input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #e6edf3; text-align: center; font-size: 20px; }
         .balance-item .bank-name { font-size: 16px; color: #58a6ff; font-weight: bold; }
+
+        /* ====== ستايل خاص بلوحة التحكم ====== */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .dash-card { background: #0d1117; padding: 20px; border-radius: 16px; border: 1px solid #30363d; text-align: center; }
+        .dash-card .icon { font-size: 32px; }
+        .dash-card .value { font-size: 32px; font-weight: bold; color: #f0883e; margin: 8px 0; }
+        .dash-card .label { font-size: 14px; color: #8b949e; }
+        .recent-list { list-style: none; padding: 0; margin: 0; }
+        .recent-list li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #30363d; }
+        .recent-list li:last-child { border-bottom: none; }
+        .recent-list .company { color: #58a6ff; }
+        .recent-list .amount { color: #f0883e; font-weight: bold; }
+        .recent-list .date { color: #8b949e; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -73,14 +87,32 @@
             <div class="live-date" id="liveDate">📅 اليوم: --/--/----</div>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" data-page="page1" id="tab1">🗂️ الموردين</button>
+            <button class="tab-btn active" data-page="page0" id="tab0">📊 الرئيسية</button>
+            <button class="tab-btn" data-page="page1" id="tab1">🗂️ الموردين</button>
             <button class="tab-btn" data-page="page2" id="tab2">🏦 الأرصدة</button>
             <button class="tab-btn" data-page="page3" id="tab3">📄 الفواتير</button>
             <button class="tab-btn" data-page="page4" id="tab4">📊 التقارير</button>
         </div>
 
-        <!-- ====== صفحة الموردين ====== -->
-        <div class="page active" id="page1">
+        <!-- ====== صفحة الرئيسية (Dashboard) ====== -->
+        <div class="page active" id="page0">
+            <div class="card">
+                <h2 id="titleDashboard">📊 لوحة التحكم</h2>
+                <div class="dashboard-grid" id="dashboardGrid">
+                    <div class="dash-card"><div class="icon">📄</div><div class="value" id="dashUnpaidCount">0</div><div class="label" id="dashUnpaidLabel">فواتير غير مدفوعة</div></div>
+                    <div class="dash-card"><div class="icon">💰</div><div class="value" id="dashUnpaidTotal">0.00</div><div class="label" id="dashUnpaidTotalLabel">إجمالي الديون</div></div>
+                    <div class="dash-card"><div class="icon">✅</div><div class="value" id="dashPaidToday">0.00</div><div class="label" id="dashPaidTodayLabel">مدفوعات اليوم</div></div>
+                    <div class="dash-card"><div class="icon">🏦</div><div class="value" id="dashTotalBalance">0.00</div><div class="label" id="dashTotalBalanceLabel">إجمالي الأرصدة</div></div>
+                </div>
+                <h3 style="color:#58a6ff;margin-top:20px;" id="dashRecentTitle">📋 آخر 5 فواتير مضافة</h3>
+                <ul class="recent-list" id="dashRecentList">
+                    <li style="color:#8b949e;text-align:center;padding:20px;">لا توجد فواتير بعد</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ====== باقي الصفحات (نفسها) ====== -->
+        <div class="page" id="page1">
             <div class="card">
                 <h2 id="titleSuppliers">🗂️ إدارة الموردين</h2>
                 <div class="flex-row">
@@ -97,45 +129,25 @@
             </div>
         </div>
 
-        <!-- ====== صفحة الأرصدة (يدوية فقط) ====== -->
         <div class="page" id="page2">
             <div class="card">
                 <h2 id="titleBalances">🏦 الأرصدة البنكية</h2>
                 <div style="color:#8b949e;font-size:14px;margin-bottom:12px;" id="balanceNote">✏️ يتم تحديث الأرصدة يدوياً يومياً (لا ترتبط بالفواتير).</div>
                 <div class="balance-grid" id="balanceGrid">
-                    <!-- الأهلي الهفوف -->
-                    <div class="balance-item">
-                        <label id="lblAhliHufuf">🇸🇦 الأهلي (الهفوف)</label>
-                        <input type="number" id="balAhliHufuf" step="0.01" />
-                    </div>
-                    <!-- الأهلي المبرز -->
-                    <div class="balance-item">
-                        <label id="lblAhliMubarraz">🇸🇦 الأهلي (المبرز)</label>
-                        <input type="number" id="balAhliMubarraz" step="0.01" />
-                    </div>
-                    <!-- الفرنسي -->
-                    <div class="balance-item">
-                        <label id="lblFaransi">🇫🇷 الفرنسي</label>
-                        <input type="number" id="balFaransi" step="0.01" />
-                    </div>
-                    <!-- الإنماء -->
-                    <div class="balance-item">
-                        <label id="lblInma">🇸🇦 الإنماء</label>
-                        <input type="number" id="balInma" step="0.01" />
-                    </div>
+                    <div class="balance-item"><label id="lblAhliHufuf">🇸🇦 الأهلي (الهفوف)</label><input type="number" id="balAhliHufuf" step="0.01" /></div>
+                    <div class="balance-item"><label id="lblAhliMubarraz">🇸🇦 الأهلي (المبرز)</label><input type="number" id="balAhliMubarraz" step="0.01" /></div>
+                    <div class="balance-item"><label id="lblFaransi">🇫🇷 الفرنسي</label><input type="number" id="balFaransi" step="0.01" /></div>
+                    <div class="balance-item"><label id="lblInma">🇸🇦 الإنماء</label><input type="number" id="balInma" step="0.01" /></div>
                 </div>
                 <div class="total-box" id="totalBalance">المجموع: 0.00 ريال</div>
             </div>
         </div>
 
-        <!-- ====== صفحة الفواتير ====== -->
         <div class="page" id="page3">
             <div class="card">
                 <h2 id="titleInvoices">📄 الفواتير المستحقة للسداد</h2>
                 <div class="flex-row">
-                    <select id="invoiceSupplierSelect" style="flex:2;min-width:200px;">
-                        <option value="">-- اختر مورد من القائمة --</option>
-                    </select>
+                    <select id="invoiceSupplierSelect" style="flex:2;min-width:200px;"><option value="">-- اختر مورد من القائمة --</option></select>
                     <input type="text" id="invoiceCompanyNew" placeholder="أو اكتب اسم جديد" />
                     <input type="number" id="invoiceAmount" placeholder="المبلغ" step="0.01" />
                     <button id="addInvoiceBtn">➕ إضافة فاتورة</button>
@@ -149,37 +161,29 @@
             </div>
         </div>
 
-        <!-- ====== صفحة التقارير ====== -->
         <div class="page" id="page4">
             <div class="card">
                 <h2 id="titleReports">📊 التقارير المالية</h2>
-                
                 <div class="filter-row">
                     <div class="flex-row">
                         <label id="lblDateFrom">📅 من تاريخ: <input type="date" id="reportDateFrom" /></label>
                         <label id="lblDateTo">📅 إلى تاريخ: <input type="date" id="reportDateTo" /></label>
-                        <select id="reportSupplierFilter" style="flex:1.5;min-width:180px;">
-                            <option value="">-- جميع الموردين --</option>
-                        </select>
+                        <select id="reportSupplierFilter" style="flex:1.5;min-width:180px;"><option value="">-- جميع الموردين --</option></select>
                         <button id="applyReportBtn" class="success">🔍 بحث</button>
                         <button id="resetReportBtn">🔄 إعادة ضبط</button>
                     </div>
                 </div>
-
                 <div class="report-summary" id="reportSummary">
                     <div class="stat"><div class="num" id="statCount">0</div><div class="label" id="statCountLabel">عدد الفواتير</div></div>
                     <div class="stat"><div class="num" id="statTotal">0.00</div><div class="label" id="statTotalLabel">إجمالي المبلغ</div></div>
                     <div class="stat"><div class="num" id="statPaid">0.00</div><div class="label" id="statPaidLabel">المدفوع</div></div>
                     <div class="stat"><div class="num" id="statUnpaid">0.00</div><div class="label" id="statUnpaidLabel">غير المدفوع</div></div>
                 </div>
-
                 <table>
                     <thead><tr><th>#</th><th id="repCompany">الشركة</th><th id="repAmount">المبلغ</th><th id="repDateAdded">تاريخ الإضافة</th><th id="repDatePaid">تاريخ الدفع</th><th id="repStatus">الحالة</th><th id="repBank">بنك الدفع</th></tr></thead>
                     <tbody id="reportBody"></tbody>
                 </table>
-                <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;">
-                    <button id="exportReportBtn" class="success">📥 تصدير التقرير (CSV)</button>
-                </div>
+                <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;"><button id="exportReportBtn" class="success">📥 تصدير التقرير (CSV)</button></div>
             </div>
         </div>
     </div>
@@ -206,7 +210,7 @@
         let data = {
             suppliers: [],
             balances: { ahliHufuf: 0, ahliMubarraz: 0, faransi: 0, inma: 0 },
-            invoices: []  // { id, company, amount, date, paid, payBank, payDate }
+            invoices: []
         };
 
         let isSaving = false;
@@ -214,7 +218,7 @@
         let currentLang = 'ar';
 
         // ============================================================
-        //  قائمة البنوك (للعرض في الدفع)
+        //  قائمة البنوك
         // ============================================================
         const BANK_OPTIONS = {
             ar: [
@@ -263,7 +267,17 @@
         const LANG = {
             ar: {
                 brandSub: '⏣ نظام إدارة الموردين والفواتير - سحابي',
-                tab1: '🗂️ الموردين', tab2: '🏦 الأرصدة', tab3: '📄 الفواتير', tab4: '📊 التقارير',
+                tab0: '📊 الرئيسية',
+                tab1: '🗂️ الموردين',
+                tab2: '🏦 الأرصدة',
+                tab3: '📄 الفواتير',
+                tab4: '📊 التقارير',
+                titleDashboard: '📊 لوحة التحكم',
+                dashUnpaidLabel: 'فواتير غير مدفوعة',
+                dashUnpaidTotalLabel: 'إجمالي الديون',
+                dashPaidTodayLabel: 'مدفوعات اليوم',
+                dashTotalBalanceLabel: 'إجمالي الأرصدة',
+                dashRecentTitle: '📋 آخر 5 فواتير مضافة',
                 titleSuppliers: '🗂️ إدارة الموردين',
                 titleBalances: '🏦 الأرصدة البنكية',
                 titleInvoices: '📄 الفواتير المستحقة للسداد',
@@ -333,7 +347,17 @@
             },
             en: {
                 brandSub: '⏣ Supplier & Invoice Management - Cloud',
-                tab1: '🗂️ Suppliers', tab2: '🏦 Balances', tab3: '📄 Invoices', tab4: '📊 Reports',
+                tab0: '📊 Dashboard',
+                tab1: '🗂️ Suppliers',
+                tab2: '🏦 Balances',
+                tab3: '📄 Invoices',
+                tab4: '📊 Reports',
+                titleDashboard: '📊 Dashboard',
+                dashUnpaidLabel: 'Unpaid Invoices',
+                dashUnpaidTotalLabel: 'Total Debt',
+                dashPaidTodayLabel: "Today's Payments",
+                dashTotalBalanceLabel: 'Total Balance',
+                dashRecentTitle: '📋 Last 5 Invoices',
                 titleSuppliers: '🗂️ Supplier Management',
                 titleBalances: '🏦 Bank Balances',
                 titleInvoices: '📄 Pending Invoices',
@@ -497,9 +521,7 @@
             let totalPaid = 0;
             tbody.innerHTML = data.invoices.map((inv, idx) => {
                 if (inv.paid) totalPaid += inv.amount;
-                const status = inv.paid ? 
-                    `<span class="badge-paid">${LANG[currentLang].paid}</span>` : 
-                    `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
+                const status = inv.paid ? `<span class="badge-paid">${LANG[currentLang].paid}</span>` : `<span class="badge-unpaid">${LANG[currentLang].unpaid}</span>`;
                 const payBank = inv.payBank || '-';
                 const dateDisplay = formatDate(inv.date, currentLang);
                 return `
@@ -519,6 +541,7 @@
                 `;
             }).join('');
             document.getElementById('totalInvoices').innerHTML = `${LANG[currentLang].totalInvoices} ${totalPaid.toFixed(2)} ريال`;
+            updateDashboard();
         }
 
         function renderBalances() {
@@ -550,15 +573,49 @@
             if (repVal) reportSelect.value = repVal;
         }
 
+        // ============================================================
+        //  لوحة التحكم (Dashboard)
+        // ============================================================
+        function updateDashboard() {
+            const today = getToday();
+            const unpaid = data.invoices.filter(inv => !inv.paid);
+            const paidToday = data.invoices.filter(inv => inv.paid && inv.payDate === today);
+
+            const unpaidCount = unpaid.length;
+            const unpaidTotal = unpaid.reduce((sum, inv) => sum + inv.amount, 0);
+            const paidTodayTotal = paidToday.reduce((sum, inv) => sum + inv.amount, 0);
+            const totalBalance = (data.balances.ahliHufuf || 0) + (data.balances.ahliMubarraz || 0) + (data.balances.faransi || 0) + (data.balances.inma || 0);
+
+            document.getElementById('dashUnpaidCount').innerText = unpaidCount;
+            document.getElementById('dashUnpaidTotal').innerText = unpaidTotal.toFixed(2);
+            document.getElementById('dashPaidToday').innerText = paidTodayTotal.toFixed(2);
+            document.getElementById('dashTotalBalance').innerText = totalBalance.toFixed(2);
+
+            // آخر 5 فواتير
+            const recent = [...data.invoices].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            const list = document.getElementById('dashRecentList');
+            if (recent.length === 0) {
+                list.innerHTML = `<li style="color:#8b949e;text-align:center;padding:20px;">لا توجد فواتير بعد</li>`;
+            } else {
+                list.innerHTML = recent.map(inv => `
+                    <li>
+                        <span class="company">${inv.company}</span>
+                        <span class="amount">${inv.amount.toFixed(2)} ريال</span>
+                        <span class="date">${formatDate(inv.date, currentLang)}</span>
+                    </li>
+                `).join('');
+            }
+        }
+
         function refreshAll() {
             renderSuppliers();
             renderInvoices();
             renderBalances();
             updateSupplierDropdowns();
             updateLiveDate();
+            updateDashboard();
             document.getElementById('invoiceHint').innerText = LANG[currentLang].invoiceHint;
             document.getElementById('balanceNote').innerText = LANG[currentLang].balanceNote;
-            // تحديث تسميات البنوك
             document.getElementById('lblAhliHufuf').innerHTML = LANG[currentLang].lblAhliHufuf;
             document.getElementById('lblAhliMubarraz').innerHTML = LANG[currentLang].lblAhliMubarraz;
             document.getElementById('lblFaransi').innerHTML = LANG[currentLang].lblFaransi;
@@ -567,7 +624,7 @@
         }
 
         // ============================================================
-        //  عمليات الموردين
+        //  عمليات الموردين والفواتير (نفسها مع إضافة الإشعار)
         // ============================================================
         function addSupplier() {
             const nameAr = document.getElementById('supplierNameAr').value.trim();
@@ -605,9 +662,6 @@
             }
         }
 
-        // ============================================================
-        //  عمليات الفواتير
-        // ============================================================
         function addInvoice() {
             const selectedSupplier = document.getElementById('invoiceSupplierSelect').value.trim();
             const newCompany = document.getElementById('invoiceCompanyNew').value.trim();
@@ -635,17 +689,11 @@
             document.getElementById('invoiceCompanyNew').value = '';
             document.getElementById('invoiceAmount').value = '';
             
-            // ============================================================
-            //  🚀 إرسال إشعار إلى تيليجرام عبر Google Apps Script
-            // ============================================================
+            // إرسال إشعار إلى تيليجرام
             fetch("https://script.google.com/macros/s/AKfycbyInpQ96mm09Ge5NGlWpdDRYqD-WyhwBaCsoeHLirFPHrDiDf2poqShp1X9UP4iVWpM1g/exec", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    company: company,
-                    amount: amount,
-                    date: new Date().toISOString().slice(0, 10)
-                })
+                body: JSON.stringify({ company, amount, date: getToday() })
             }).catch(err => console.log('خطأ في الإشعار:', err));
             
             refreshAll();
@@ -669,9 +717,6 @@
             }
         }
 
-        // ============================================================
-        //  دفع الفاتورة (مع قائمة البنوك الجديدة)
-        // ============================================================
         function markAsPaid(id) {
             const invoice = data.invoices.find(inv => inv.id === id);
             if (!invoice) return;
@@ -679,9 +724,7 @@
 
             const banks = BANK_OPTIONS[currentLang];
             let msg = currentLang === 'ar' ? 'اختر البنك الذي دُفع منه:\n' : 'Select bank:\n';
-            banks.forEach((b, i) => {
-                msg += `${i+1}. ${b.label}\n`;
-            });
+            banks.forEach((b, i) => { msg += `${i+1}. ${b.label}\n`; });
             const bankChoice = prompt(msg, '1');
             const idx = parseInt(bankChoice) - 1;
             if (isNaN(idx) || idx < 0 || idx >= banks.length) {
@@ -709,15 +752,9 @@
 
             let filtered = data.invoices.filter(inv => inv.paid === true);
 
-            if (dateFrom) {
-                filtered = filtered.filter(inv => inv.payDate && inv.payDate >= dateFrom);
-            }
-            if (dateTo) {
-                filtered = filtered.filter(inv => inv.payDate && inv.payDate <= dateTo);
-            }
-            if (supplierFilter) {
-                filtered = filtered.filter(inv => inv.company === supplierFilter);
-            }
+            if (dateFrom) filtered = filtered.filter(inv => inv.payDate && inv.payDate >= dateFrom);
+            if (dateTo) filtered = filtered.filter(inv => inv.payDate && inv.payDate <= dateTo);
+            if (supplierFilter) filtered = filtered.filter(inv => inv.company === supplierFilter);
 
             const tbody = document.getElementById('reportBody');
             if (filtered.length === 0) {
@@ -726,17 +763,7 @@
                 tbody.innerHTML = filtered.map((inv, idx) => {
                     const dateAdded = formatDate(inv.date, currentLang);
                     const datePaid = inv.payDate ? formatDate(inv.payDate, currentLang) : '-';
-                    return `
-                        <tr>
-                            <td>${idx+1}</td>
-                            <td>${inv.company}</td>
-                            <td>${inv.amount.toFixed(2)}</td>
-                            <td>${dateAdded}</td>
-                            <td>${datePaid}</td>
-                            <td><span class="badge-paid">${LANG[currentLang].paid}</span></td>
-                            <td>${inv.payBank || '-'}</td>
-                        </tr>
-                    `;
+                    return `<tr><td>${idx+1}</td><td>${inv.company}</td><td>${inv.amount.toFixed(2)}</td><td>${dateAdded}</td><td>${datePaid}</td><td><span class="badge-paid">${LANG[currentLang].paid}</span></td><td>${inv.payBank || '-'}</td></tr>`;
                 }).join('');
             }
 
@@ -753,26 +780,21 @@
                 alert(currentLang === 'ar' ? 'لا توجد بيانات لتصديرها' : 'No data to export');
                 return;
             }
-            const headers = currentLang === 'ar' ? 
-                'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع' :
-                'Company,Amount,Added Date,Payment Date,Bank';
+            const headers = currentLang === 'ar' ? 'الشركة,المبلغ,تاريخ الإضافة,تاريخ الدفع,بنك الدفع' : 'Company,Amount,Added Date,Payment Date,Bank';
             let csv = headers + '\n';
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
-                if (cols.length >= 7) {
-                    csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText}\n`;
-                }
+                if (cols.length >= 7) csv += `${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText},${cols[6].innerText}\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            const fileName = currentLang === 'ar' ? `تقرير_المدفوعات_${getToday()}.csv` : `Payment_Report_${getToday()}.csv`;
-            link.download = fileName;
+            link.download = `${currentLang === 'ar' ? 'تقرير_المدفوعات' : 'Payment_Report'}_${getToday()}.csv`;
             link.click();
         }
 
         // ============================================================
-        //  الأرصدة (يدوية فقط)
+        //  الأرصدة
         // ============================================================
         document.getElementById('balAhliHufuf').addEventListener('input', function() {
             data.balances.ahliHufuf = parseFloat(this.value) || 0;
@@ -792,7 +814,7 @@
         });
 
         // ============================================================
-        //  أحداث التقارير
+        //  أحداث التقارير واللغة والتنقل
         // ============================================================
         document.getElementById('applyReportBtn').addEventListener('click', generateReport);
         document.getElementById('resetReportBtn').addEventListener('click', function() {
@@ -803,18 +825,21 @@
         });
         document.getElementById('exportReportBtn').addEventListener('click', exportReportCSV);
 
-        // ============================================================
-        //  اللغة
-        // ============================================================
         function applyLanguage(lang) {
             currentLang = lang;
             const t = LANG[lang];
-            
             document.getElementById('brandSub').innerText = t.brandSub;
+            document.getElementById('tab0').innerText = t.tab0;
             document.getElementById('tab1').innerText = t.tab1;
             document.getElementById('tab2').innerText = t.tab2;
             document.getElementById('tab3').innerText = t.tab3;
             document.getElementById('tab4').innerText = t.tab4;
+            document.getElementById('titleDashboard').innerText = t.titleDashboard;
+            document.getElementById('dashUnpaidLabel').innerText = t.dashUnpaidLabel;
+            document.getElementById('dashUnpaidTotalLabel').innerText = t.dashUnpaidTotalLabel;
+            document.getElementById('dashPaidTodayLabel').innerText = t.dashPaidTodayLabel;
+            document.getElementById('dashTotalBalanceLabel').innerText = t.dashTotalBalanceLabel;
+            document.getElementById('dashRecentTitle').innerText = t.dashRecentTitle;
             document.getElementById('titleSuppliers').innerText = t.titleSuppliers;
             document.getElementById('titleBalances').innerText = t.titleBalances;
             document.getElementById('titleInvoices').innerText = t.titleInvoices;
@@ -874,7 +899,7 @@
                 data.balances.inma = parseFloat(this.value) || 0;
                 refreshAll();
             });
-            
+
             updateSupplierDropdowns();
             updateLiveDate();
             refreshAll();
@@ -889,9 +914,6 @@
             applyLanguage(newLang);
         });
 
-        // ============================================================
-        //  التنقل
-        // ============================================================
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -902,27 +924,19 @@
             });
         });
 
-        // ============================================================
-        //  ربط الأزرار
-        // ============================================================
         document.getElementById('addSupplierBtn').addEventListener('click', addSupplier);
         document.getElementById('addInvoiceBtn').addEventListener('click', addInvoice);
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const activeId = document.activeElement.id;
-                if (['supplierNameAr','supplierNameEn','supplierBank','supplierIban'].includes(activeId)) {
-                    addSupplier();
-                } else if (['invoiceCompanyNew','invoiceAmount'].includes(activeId)) {
-                    addInvoice();
-                }
+                if (['supplierNameAr','supplierNameEn','supplierBank','supplierIban'].includes(activeId)) addSupplier();
+                else if (['invoiceCompanyNew','invoiceAmount'].includes(activeId)) addInvoice();
             }
         });
 
         document.getElementById('invoiceSupplierSelect').addEventListener('change', function() {
-            if (this.value) {
-                document.getElementById('invoiceCompanyNew').value = this.value;
-            }
+            if (this.value) document.getElementById('invoiceCompanyNew').value = this.value;
         });
 
         // ============================================================
@@ -936,7 +950,7 @@
             lastMonth.setDate(lastMonth.getDate() - 30);
             document.getElementById('reportDateFrom').value = lastMonth.toISOString().slice(0,10);
             document.getElementById('reportDateTo').value = today;
-            
+
             db.collection('appData').doc('mainData').onSnapshot((doc) => {
                 if (doc.exists) {
                     const cloudData = doc.data();
@@ -962,7 +976,7 @@
             setInterval(updateLiveDate, 60000);
         })();
 
-        console.log('✅ النظام جاهز مع البنوك الجديدة (الأهلي الهفوف، الأهلي المبرز، الفرنسي، الإنماء)');
+        console.log('✅ النظام جاهز مع لوحة التحكم البسيطة');
     </script>
 </body>
 </html>
