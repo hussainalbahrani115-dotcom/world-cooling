@@ -20,7 +20,9 @@
       الدفع، فتح التشخيص الكامل بعده) مبني بالفعل في Phase 3 عبر
       `POST /diagnostics/sessions/:id/simulate-payment` المؤقت — المتبقي فقط هو استبداله
       بمعالج Webhook حقيقي من البوابة عند الاقتراب من الإطلاق.
-- [ ] Phase 5 — لوحة التحكم الإدارية (Admin Panel)
+- [x] **Phase 5 — لوحة التحكم الإدارية (Admin Panel)**: واجهة كاملة لإدارة الأجهزة/
+      الأنظمة الفرعية/الأعراض/قطع الغيار/شجرة القرار بالكامل (أسئلة، إجابات، تشخيص، ربط
+      قطع الغيار) دون لمس الكود، بالإضافة لتقارير أداء (نسبة نجاح التشخيص، نسبة التحويل للدفع).
 - [ ] Phase 6 — تطبيق الموبايل (Flutter)
 
 كل مرحلة تُبنى فقط بعد تأكيد إتمام السابقة (باستثناء Phase 4 المؤجَّلة عمداً كما هو موضح أعلاه).
@@ -30,11 +32,12 @@
 ```
 .
 ├── backend/        # NestJS (TypeScript) API + Prisma schema/migrations
-├── admin-web/      # React + TypeScript — هيكل أولي للوحة التحكم الإدارية (Phase 5 لاحقاً)
+├── admin-web/      # React + TypeScript — لوحة التحكم الإدارية (Phase 5)
 └── docker-compose.yml
 ```
 
-الفرونت إند للتطبيق (Flutter، Phase 6) وربط بوابة الدفع (HyperPay/Moyasar، Phase 4) لم يُبنيا بعد.
+تطبيق الموبايل (Flutter، Phase 6) وربط بوابة الدفع الحقيقية (HyperPay/Moyasar، Phase 4 —
+مؤجَّلة عمداً) لم يُبنيا بعد.
 
 ## التشغيل محلياً
 
@@ -61,13 +64,17 @@ npm run start:dev
 بعد التشغيل، `GET /catalog/appliances` يعرض الأجهزة لاختيار `applianceId`، ثم يمكن تجربة
 محرك التشخيص كما في القسم التالي.
 
-### تطوير لوحة الأدمن (هيكل أولي فقط)
+### تطوير لوحة الأدمن
 
 ```bash
 cd admin-web
+cp .env.example .env   # عدّل VITE_API_BASE_URL إذا كان الـ backend على منفذ/مضيف مختلف
 npm install
 npm run dev
 ```
+
+عند فتح اللوحة (افتراضياً على `http://localhost:5173`) ستطلب رمز الدخول — وهو نفس قيمة
+`ADMIN_API_TOKEN` من `.env` الخاص بالـ backend.
 
 ## مخطط قاعدة البيانات
 
@@ -125,6 +132,47 @@ npm run dev
 متفرّعان يؤديان إلى 5 نتائج تشخيص مختلفة عبر بوابتي دفع، مع 5 قطع غيار) لإثبات عمل
 المحرك فعلياً. الشجرة الكاملة لبقية الأجهزة تُبنى لاحقاً عبر لوحة التحكم الإدارية
 (Phase 5) بلا حاجة لتعديل هذا الكود — تماماً كما ينص مبدأ Content-driven, not code-driven.
+
+## لوحة التحكم الإدارية (Admin Panel — Phase 5)
+
+### الحماية
+
+كل نقاط `/admin/*` محمية بحارس بسيط يتطلب ترويسة `x-admin-token` مطابقة لمتغير البيئة
+`ADMIN_API_TOKEN` (`backend/src/admin/admin-api-key.guard.ts`). هذا **ليس نظام مصادقة
+كامل** (لا مستخدمين/أدوار) بل حاجز أدنى يمنع وصول أي شخص عشوائي للوحة تحكم تكتب في
+قاعدة البيانات مباشرة — غيّر القيمة الافتراضية في `.env` قبل أي نشر خارج جهازك المحلي.
+
+### واجهات الإدارة
+
+- **الأجهزة**: `GET/POST /admin/appliances`، `PATCH/DELETE /admin/appliances/:id`.
+- **الأنظمة الفرعية**: `GET/POST /admin/appliances/:id/subsystems`،
+  `PATCH/DELETE /admin/subsystems/:id`.
+- **الأعراض**: `GET/POST /admin/appliances/:id/symptoms`،
+  `PATCH/DELETE /admin/symptoms/:id`.
+- **قطع الغيار**: `GET/POST /admin/parts`، `PATCH/DELETE /admin/parts/:id`.
+- **شجرة القرار**: `GET /admin/appliances/:id/tree` (الشجرة كاملة)،
+  `POST /admin/appliances/:id/nodes` + `PATCH/DELETE /admin/nodes/:id`،
+  `POST /admin/nodes/:id/answers` + `PATCH/DELETE /admin/answers/:id`،
+  `POST /admin/nodes/:id/diagnosis` + `PATCH/DELETE /admin/diagnoses/:id` +
+  `PUT /admin/diagnoses/:id/parts` (استبدال قائمة قطع الغيار المرتبطة بالكامل).
+- **التقارير**: `GET /admin/reports/overview` و`GET /admin/reports/by-appliance` — نسبة
+  نجاح التشخيص (الجلسات التي وصلت لبوابة الدفع/التشخيص ÷ إجمالي الجلسات) ونسبة التحويل
+  للدفع (الجلسات المدفوعة ÷ الجلسات التي وصلت للبوابة).
+
+### حماية سلامة الشجرة عند الحذف
+
+بعض العلاقات في المخطط اختيارية، وPrisma يولّد لها `ON DELETE SET NULL` تلقائياً
+(مثل `next_node_id`، `parent_node_id`، `subsystem_id` على الأعراض/العقد) — أي أن قيد
+المفتاح الأجنبي وحده **لا يمنع** حذف عقدة يشير إليها سؤال آخر، بل يُفرغ ذلك المرجع بصمت
+ويكسر الشجرة دون تنبيه. لذا يتحقق `AdminTreeService`/`AdminCatalogService` يدوياً قبل كل
+حذف (إجابات تشير للعقدة، عقد فرعية، تشخيص مرتبط، أعراض/عقد مرتبطة بنظام فرعي) ويرفض
+الحذف بخطأ 400 واضح بدل السماح بفساد صامت في البيانات.
+
+### admin-web
+
+تطبيق React+TypeScript (Vite) بأربع تبويبات: الأجهزة والأعراض، شجرة القرار (محرر تفاعلي
+لإضافة/تعديل/حذف الأسئلة والإجابات والتشخيص وربط قطع الغيار)، قطع الغيار، والتقارير.
+يخزّن رمز `x-admin-token` في `localStorage` بعد التحقق منه مرة واحدة عبر شاشة دخول بسيطة.
 
 ## مبادئ تصميمية أساسية
 
