@@ -11,7 +11,8 @@
 
 - [x] **Phase 1 — الأساسات (Setup)**: هيكل المشروع (Backend + Database + Frontend Skeleton)،
       مخطط قاعدة البيانات والـ Migrations، بيئة تطوير محلية عبر Docker Compose.
-- [ ] Phase 2 — الفهرس الشامل للأجهزة والأعطال (Seed Data)
+- [x] **Phase 2 — الفهرس الشامل للأجهزة والأعطال (Master Index / Seed Data)**: 10 أجهزة
+      (4 تكييف، 3 ثلاجات، 3 أفران)، مقسّمة إلى أنظمة فرعية، مع قائمة أعراض أولية شائعة لكل جهاز.
 - [ ] Phase 3 — محرك شجرة القرار (Diagnostic Engine)
 - [ ] Phase 4 — بوابة الدفع والنتيجة النهائية
 - [ ] Phase 5 — لوحة التحكم الإدارية (Admin Panel)
@@ -48,6 +49,7 @@ cd backend
 cp .env.example .env   # عدّل DATABASE_URL إذا لزم
 npm install
 npm run prisma:migrate  # ينشئ قاعدة البيانات ويطبّق مخطط prisma/schema.prisma
+npm run db:seed         # يبني الفهرس الأولي للأجهزة/الأنظمة الفرعية/الأعراض (Phase 2)
 npm run start:dev
 ```
 
@@ -66,6 +68,18 @@ npm run dev
 `diagnosis_parts`, `parts`, `user_sessions`, `users`, `payments`. الحقول المرنة
 (`metadata`, `compatible_models`, `answers_log`, `device_tokens`) من نوع JSONB لدعم
 التوسع المستقبلي دون الحاجة لـ migration جديد لكل ميزة.
+
+## بيانات البذر (Seed Data — Phase 2)
+
+`backend/prisma/seed.ts` يبني الفهرس الأولي (`npm run db:seed`)، ويغطي:
+
+- **تكييف**: سبليت، شباك، مركزي، كاسيت
+- **ثلاجات**: عادية، نوفروست، سايد باي سايد
+- **أفران**: كهربائي، غاز، بلت إن
+
+لكل جهاز أنظمته الفرعية الخاصة به (دورة التبريد، الضاغط، النظام الكهربائي، نظام التحكم،
+الفك الثلجي، نظام الغاز والإشعال... حسب نوع الجهاز) وقائمة أعراض ظاهرية أولية شائعة مرتبطة
+بالنظام الفرعي المسبب لها. السكربت آمن للتشغيل المتكرر (idempotent) — لا يُنشئ سجلات مكررة.
 
 ## مبادئ تصميمية أساسية
 
