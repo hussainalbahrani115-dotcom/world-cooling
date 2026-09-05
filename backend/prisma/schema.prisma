@@ -1,0 +1,193 @@
+// Smart Technician Platform — database schema (Phase 1: Setup)
+// Mirrors the schema defined in the project specification section 3 (Database Schema).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NodeType {
+  question
+  diagnosis
+  paywall
+}
+
+enum SessionStatus {
+  active
+  paid
+  abandoned
+}
+
+// أنواع الأجهزة
+model Appliance {
+  id        String   @id @default(uuid())
+  nameAr    String   @map("name_ar")
+  nameEn    String   @map("name_en")
+  category  String
+  imageUrl  String?  @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  subsystems      Subsystem[]
+  symptoms        Symptom[]
+  diagnosticNodes DiagnosticNode[]
+  userSessions    UserSession[]
+
+  @@map("appliances")
+}
+
+// الأنظمة الفرعية لكل جهاز (دورة التبريد، الكهرباء، التحكم...)
+model Subsystem {
+  id          String @id @default(uuid())
+  applianceId String @map("appliance_id")
+  nameAr      String @map("name_ar")
+  nameEn      String @map("name_en")
+
+  appliance       Appliance        @relation(fields: [applianceId], references: [id])
+  symptoms        Symptom[]
+  diagnosticNodes DiagnosticNode[]
+
+  @@map("subsystems")
+}
+
+// الأعراض الظاهرية الأولية
+model Symptom {
+  id          String  @id @default(uuid())
+  applianceId String  @map("appliance_id")
+  subsystemId String? @map("subsystem_id")
+  title       String
+  description String?
+
+  appliance Appliance  @relation(fields: [applianceId], references: [id])
+  subsystem Subsystem? @relation(fields: [subsystemId], references: [id])
+
+  @@map("symptoms")
+}
+
+// عقد شجرة القرار (جوهر النظام)
+model DiagnosticNode {
+  id               String   @id @default(uuid())
+  applianceId      String   @map("appliance_id")
+  subsystemId      String?  @map("subsystem_id")
+  questionText     String?  @map("question_text")
+  nodeType         NodeType @map("node_type")
+  parentNodeId     String?  @map("parent_node_id")
+  confidenceWeight Float?   @map("confidence_weight")
+  // مرونة لإضافة صور/فيديو/شروط مستقبلية دون Migration لكل ميزة
+  metadata         Json?
+
+  appliance    Appliance        @relation(fields: [applianceId], references: [id])
+  subsystem    Subsystem?       @relation(fields: [subsystemId], references: [id])
+  parentNode   DiagnosticNode?  @relation("NodeHierarchy", fields: [parentNodeId], references: [id])
+  childNodes   DiagnosticNode[] @relation("NodeHierarchy")
+  answers      NodeAnswer[]     @relation("AnswersForNode")
+  incomingAs   NodeAnswer[]     @relation("AnswersToNode")
+  diagnoses    Diagnosis[]
+  userSessions UserSession[]
+
+  @@map("diagnostic_nodes")
+}
+
+// خيارات الإجابة لكل سؤال
+model NodeAnswer {
+  id         String  @id @default(uuid())
+  nodeId     String  @map("node_id")
+  answerText String  @map("answer_text")
+  nextNodeId String? @map("next_node_id")
+
+  node     DiagnosticNode  @relation("AnswersForNode", fields: [nodeId], references: [id])
+  nextNode DiagnosticNode? @relation("AnswersToNode", fields: [nextNodeId], references: [id])
+
+  @@map("node_answers")
+}
+
+// نتائج التشخيص النهائية
+model Diagnosis {
+  id             String @id @default(uuid())
+  finalNodeId    String @map("final_node_id")
+  diagnosisTitle String @map("diagnosis_title")
+  rootCause      String @map("root_cause")
+  severityLevel  String @map("severity_level")
+
+  finalNode DiagnosticNode  @relation(fields: [finalNodeId], references: [id])
+  parts     DiagnosisPart[]
+
+  @@map("diagnoses")
+}
+
+// ربط التشخيص بقطع الغيار
+model DiagnosisPart {
+  diagnosisId String  @map("diagnosis_id")
+  partId      String  @map("part_id")
+  isRequired  Boolean @default(true) @map("is_required")
+
+  diagnosis Diagnosis @relation(fields: [diagnosisId], references: [id])
+  part      Part      @relation(fields: [partId], references: [id])
+
+  @@id([diagnosisId, partId])
+  @@map("diagnosis_parts")
+}
+
+// قطع الغيار
+model Part {
+  id               String  @id @default(uuid())
+  name             String
+  sku              String  @unique
+  price            Decimal @db.Decimal(10, 2)
+  storeUrl         String  @map("store_url")
+  stockStatus      String  @map("stock_status")
+  compatibleModels Json?   @map("compatible_models")
+
+  diagnoses DiagnosisPart[]
+
+  @@map("parts")
+}
+
+// جلسات تشخيص المستخدمين
+model UserSession {
+  id              String        @id @default(uuid())
+  userId          String?       @map("user_id")
+  applianceId     String        @map("appliance_id")
+  currentNodeId   String?       @map("current_node_id")
+  answersLog      Json?         @map("answers_log")
+  confidenceScore Float?        @map("confidence_score")
+  status          SessionStatus @default(active)
+
+  user        User?           @relation(fields: [userId], references: [id])
+  appliance   Appliance       @relation(fields: [applianceId], references: [id])
+  currentNode DiagnosticNode? @relation(fields: [currentNodeId], references: [id])
+  payments    Payment[]
+
+  @@map("user_sessions")
+}
+
+// المستخدمون
+model User {
+  id           String   @id @default(uuid())
+  phone        String?  @unique
+  email        String?  @unique
+  createdAt    DateTime @default(now()) @map("created_at")
+  deviceTokens Json?    @map("device_tokens")
+
+  sessions UserSession[]
+
+  @@map("users")
+}
+
+// المدفوعات
+model Payment {
+  id         String    @id @default(uuid())
+  sessionId  String    @map("session_id")
+  amount     Decimal   @db.Decimal(10, 2)
+  currency   String    @default("SAR")
+  status     String
+  gatewayRef String?   @map("gateway_ref")
+  paidAt     DateTime? @map("paid_at")
+
+  session UserSession @relation(fields: [sessionId], references: [id])
+
+  @@map("payments")
+}
