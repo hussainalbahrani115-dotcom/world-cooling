@@ -5,3 +5,6 @@ build/
 *.log
 .DS_Store
 *.tsbuildinfo
+backend/prisma/seed.js
+backend/prisma/seed.js.map
+backend/prisma/seed.d.ts
